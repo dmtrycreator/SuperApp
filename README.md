@@ -41,7 +41,10 @@ sudo apt install -y openjdk-21-jdk git maven unzip
    ./install.sh
    ```
 
-   Для удаления:
+2. **Удаление приложения**
+
+   Для удаления выполните:
+
    ```bash
    cd ~
    chmod +x SuperApp/uninstall_superapp.sh
