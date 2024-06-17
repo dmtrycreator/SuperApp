@@ -58,7 +58,7 @@
                   </Label>
                   <HBox alignment="CENTER" spacing="10.0">
                      <children>
-                          <TextField fx:id="directoryField" prefHeight="46.0" prefWidth="340.0" promptText="Путь установки" style="-fx-background-color: #313131; -fx-background-radius: 12; -fx-text-fill: #F5FAFF;">
+                          <TextField fx:id="directoryField" editable="false" prefHeight="46.0" prefWidth="340.0" promptText="Путь установки" style="-fx-background-color: #313131; -fx-background-radius: 12; -fx-text-fill: #F5FAFF;">
                            <font>
                               <Font name="Inter Medium" size="14.0" />
                            </font>
