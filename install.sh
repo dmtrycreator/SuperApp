@@ -11,15 +11,16 @@ fi
 # Клонирование репозитория
 sudo git clone https://github.com/dmtrycreator/SuperApp.git /opt/SuperApp
 
+# Перемещение необходимых директорий
+mkdir -p /opt/SuperApp/src/main
+mv /opt/SuperApp/home /opt/SuperApp/src/main/home
+mv /opt/SuperApp/trash /opt/SuperApp/src/main/trash
+
 # Переход в директорию проекта
 cd /opt/SuperApp || exit
 
 # Компиляция проекта с помощью Maven
 sudo mvn clean package
-
-# Создание необходимых директорий
-mkdir -p /opt/SuperApp/src/main/home
-mkdir -p /opt/SuperApp/src/main/trash
 
 # Установка шрифтов
 mkdir -p ~/.fonts
