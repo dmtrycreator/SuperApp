@@ -31,13 +31,18 @@ public class SuperApp extends Application {
         return Files.exists(Paths.get(INSTALL_FLAG));
     }
 
-    private void showInstallationWindow(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(SuperApp.class.getResource("install.fxml"));
-        Scene scene = new Scene(fxmlLoader.load());
-        stage.setScene(scene);
-        stage.setTitle("SuperApp Installation");
-        stage.show();
-    }
+private void showInstallationWindow(Stage stage) throws IOException {
+    FXMLLoader fxmlLoader = new FXMLLoader(SuperApp.class.getResource("install.fxml"));
+    Scene scene = new Scene(fxmlLoader.load());
+
+    InstallController controller = fxmlLoader.getController();
+    controller.setStage(stage);
+
+    stage.setScene(scene);
+    stage.setTitle("SuperApp Installation");
+    stage.show();
+}
+
 
     private void showMainWindow(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(SuperApp.class.getResource("main.fxml"));
