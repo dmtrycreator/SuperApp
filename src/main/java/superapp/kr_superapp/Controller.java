@@ -746,7 +746,7 @@ public class Controller {
      *
      * @param message Сообщение для установки.
      */
-    private void setStatusMessage(String message) {
+    public void setStatusMessage(String message) {
         if (statusLabel != null) {
             statusLabel.setText(message);
         } else {
