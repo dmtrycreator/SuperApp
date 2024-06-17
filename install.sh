@@ -42,7 +42,7 @@ Name=SuperApp
 Exec=java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar /opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar
 Icon=/opt/SuperApp/src/main/resources/superapp/kr_superapp/icons/Icon_SuperApp.png
 Type=Application
-Categories=Utility;
+Categories=Utility;"
 
 echo "$DESKTOP_ENTRY" > ~/.local/share/applications/SuperApp.desktop
 
