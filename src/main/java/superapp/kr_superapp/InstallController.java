@@ -3,7 +3,6 @@ package superapp.kr_superapp;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -23,35 +22,28 @@ public class InstallController {
     private Stage stage;
 
     // Константы для директорий установки
-    private static final String BASE_DIR = System.getProperty("user.home") + "/SuperApp";
-    private static final String HOME_DIR = BASE_DIR + "/home";
-    private static final String TRASH_DIR = BASE_DIR + "/trash";
-    private static final String FONTS_DIR = BASE_DIR + "/fonts";
-    private static final String JAVA_FX_LIB = BASE_DIR + "/javafx/lib";
-    private static final String INSTALL_FLAG = BASE_DIR + "/.installed";
+    private static final String HOME_DIR = System.getProperty("user.home") + "/SuperApp/src/main/home";
+    private static final String TRASH_DIR = System.getProperty("user.home") + "/SuperApp/src/main/trash";
+    private static final String FONTS_DIR = System.getProperty("user.home") + "/SuperApp/src/main/fonts";
+    private static final String JAVA_FX_LIB = System.getProperty("user.home") + "/SuperApp/src/main/javafx/lib";
+    private static final String INSTALL_FLAG = System.getProperty("user.home") + "/SuperApp/src/main/.installed";
 
     @FXML
     private void initialize() {
-        // Инициализация контроллера
+        // Установка пути по умолчанию в текстовое поле
+        directoryField.setText(System.getProperty("user.home") + "/SuperApp");
+        directoryField.setEditable(false);
     }
 
     @FXML
     private void handleBrowse() {
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setTitle("Выбор директории для установки");
-        File selectedDirectory = directoryChooser.showDialog(stage);
-        if (selectedDirectory != null) {
-            directoryField.setText(selectedDirectory.getAbsolutePath());
-        }
+        statusLabel.setText("Изменить в данной версии ещё нельзя.");
+        statusLabel.setStyle("-fx-text-fill: #FF0000;");
     }
 
     @FXML
     private void handleInstall() {
         String directory = directoryField.getText();
-        if (directory == null || directory.isEmpty()) {
-            statusLabel.setText("Пожалуйста, выберите корректную директорию для установки.");
-            return;
-        }
 
         try {
             Path installPath = Paths.get(directory);
