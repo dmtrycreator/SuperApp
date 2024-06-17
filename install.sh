@@ -4,7 +4,7 @@
 sudo apt update
 sudo apt install -y openjdk-21-jdk git maven unzip
 
-# Удаление старой версии приложения, если оно существует
+# Удаление старой версии приложения, если она существует
 if [ -d "/opt/SuperApp" ]; then
     sudo rm -rf /opt/SuperApp
 fi
@@ -43,17 +43,6 @@ sudo cp /opt/SuperApp/src/main/Process.sh /usr/local/bin/Process.sh
 sudo cp /opt/SuperApp/src/main/System.sh /usr/local/bin/System.sh
 sudo cp /opt/SuperApp/src/main/Terminal.sh /usr/local/bin/Terminal.sh
 
-# Добавление приложения в меню
-DESKTOP_ENTRY="[Desktop Entry]
-Version=1.0
-Name=SuperApp
-Exec=java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar /opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar
-Icon=/opt/SuperApp/src/main/resources/superapp/kr_superapp/icons/Icon_SuperApp.png
-Type=Application
-Categories=Utility;"
-
-echo "$DESKTOP_ENTRY" > ~/.local/share/applications/SuperApp.desktop
-
 # Установочные директории
 INSTALL_DIR="$HOME/SuperApp"
 
@@ -69,6 +58,9 @@ if [ -d "/opt/SuperApp/src/main/resources/fonts" ]; then
 else
     echo "Каталог '/opt/SuperApp/src/main/resources/fonts' не существует. Пропускаем копирование шрифтов."
 fi
+
+# Копируем JAR файл в установочную директорию
+cp /opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar "$INSTALL_DIR/"
 
 # Добавляем приложение в меню приложений
 DESKTOP_ENTRY="[Desktop Entry]
