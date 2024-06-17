@@ -35,10 +35,7 @@ public class SuperApp extends Application {
         }
 
         // Создание необходимых директорий, если они не существуют
-        Files.createDirectories(Paths.get(HOME_DIR));
-        Files.createDirectories(Paths.get(TRASH_DIR));
-        Files.createDirectories(Paths.get(FONTS_DIR));
-        Files.createDirectories(Paths.get(JAVA_FX_LIB));
+        createDirectories();
 
         if (!isInstalled()) {
             showInstallationWindow(stage);
@@ -49,6 +46,13 @@ public class SuperApp extends Application {
         stage.setOnCloseRequest(event -> {
             deleteLockFile();
         });
+    }
+
+    private void createDirectories() throws IOException {
+        Files.createDirectories(Paths.get(HOME_DIR));
+        Files.createDirectories(Paths.get(TRASH_DIR));
+        Files.createDirectories(Paths.get(FONTS_DIR));
+        Files.createDirectories(Paths.get(JAVA_FX_LIB));
     }
 
     private boolean isInstalled() {
