@@ -142,16 +142,17 @@ public class Controller {
 
     private Comparator<Path> currentComparator = Comparator.comparing(path -> path.toFile().lastModified());
 
-    // Константы для директорий установки
-    private static final String HOME_DIR = "system/home";
-    private static final String TRASH_DIR = "system/trash";
-    private static final String FONTS_DIR = "system/fonts";
-    private static final String JAVA_FX_LIB = "system/javafx/lib";
-    private static final String INSTALL_FLAG = "system/.installed";
+// Константы для директорий установки
+private static final String HOME_DIR = "src/main/home";
+private static final String TRASH_DIR = "src/main/trash";
+private static final String FONTS_DIR = "src/main/fonts";
+private static final String JAVA_FX_LIB = "src/main/javafx/lib";
+private static final String INSTALL_FLAG = "src/main/.installed";
 
-    // URL репозитория GitHub и временная директория
-    private static final String GITHUB_REPO_URL = "https://github.com/YOUR-USERNAME/SuperApp.git";
-    private static final String TEMP_DIR = "system/temp";
+// URL репозитория GitHub и временная директория
+private static final String GITHUB_REPO_URL = "https://github.com/dmtrycreator/SuperApp.git";
+private static final String TEMP_DIR = "src/main/temp";
+
 
     /**
      * Конструктор для создания и инициализации Controller.
