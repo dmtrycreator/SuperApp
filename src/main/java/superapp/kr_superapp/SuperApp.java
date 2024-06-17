@@ -13,11 +13,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class SuperApp extends Application {
-    private static final String HOME_DIR = "system/home";
-    private static final String TRASH_DIR = "system/trash";
-    private static final String FONTS_DIR = "system/fonts";
-    private static final String JAVA_FX_LIB = "system/javafx/lib";
-    private static final String INSTALL_FLAG = "system/.installed";
+    private static final String HOME_DIR = "src/main/home";
+    private static final String TRASH_DIR = "src/main/trash";
+    private static final String FONTS_DIR = "src/main/fonts";
+    private static final String JAVA_FX_LIB = "src/main/javafx/lib";
+private static final String INSTALL_FLAG = "src/main/.installed";
 
     @Override
     public void start(Stage stage) throws IOException {
