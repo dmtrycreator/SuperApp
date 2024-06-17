@@ -22,17 +22,20 @@ sudo mvn clean package
 mkdir -p ~/.fonts
 cp -r /opt/SuperApp/lib/fonts/* ~/.fonts
 
-# Копирование исполняемых файлов
+# Копирование исполняемых файлов и установка прав
 sudo cp /opt/SuperApp/src/main/Process.sh /usr/local/bin/Process.sh
 sudo cp /opt/SuperApp/src/main/System.sh /usr/local/bin/System.sh
 sudo cp /opt/SuperApp/src/main/Terminal.sh /usr/local/bin/Terminal.sh
+sudo chmod +x /usr/local/bin/Process.sh
+sudo chmod +x /usr/local/bin/System.sh
+sudo chmod +x /usr/local/bin/Terminal.sh
 
 # Добавление приложения в меню
 DESKTOP_ENTRY="[Desktop Entry]
 Version=1.0
 Name=SuperApp
 Exec=java -jar /opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar
-Icon=/opt/SuperApp/icon.png
+Icon=/opt/SuperApp/src/main/resources/superapp/kr_superapp/icons/Icon_SuperApp.png
 Type=Application
 Categories=Utility;"
 
