@@ -4,7 +4,7 @@
 sudo apt update
 sudo apt install -y openjdk-21-jdk git maven unzip
 
-# Удаление старой версии приложения, если она существует
+# Удаление старой версии приложения, если оно существует
 if [ -d "/opt/SuperApp" ]; then
     sudo rm -rf /opt/SuperApp
 fi
@@ -20,14 +20,22 @@ sudo mvn clean package
 
 # Установка шрифтов
 mkdir -p ~/.fonts
-cp -r /opt/SuperApp/src/main/fonts/* ~/.fonts
+if [ -d "/opt/SuperApp/src/main/fonts" ]; then
+    cp -r /opt/SuperApp/src/main/fonts/* ~/.fonts
+else
+    echo "Каталог '/opt/SuperApp/src/main/fonts' не существует. Пропускаем копирование шрифтов."
+fi
 
 # Установка JavaFX
 sudo mkdir -p /opt/javafx
 cd /opt/javafx
 sudo curl -L -o openjfx.zip https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_linux-x64_bin-sdk.zip
 sudo unzip openjfx.zip
-sudo mv javafx-sdk-22.0.1/lib ./
+if [ ! -d "./lib" ]; then
+    sudo mv javafx-sdk-22.0.1/lib ./
+else
+    echo "Каталог './lib' уже существует. Пропускаем перемещение библиотек."
+fi
 sudo rm -rf javafx-sdk-22.0.1 openjfx.zip
 
 # Копирование исполняемых файлов
@@ -56,7 +64,11 @@ mkdir -p "$INSTALL_DIR/fonts"
 mkdir -p "$INSTALL_DIR/javafx/lib"
 
 # Копируем файлы в установочную директорию
-cp -r /opt/SuperApp/src/main/resources/fonts/* "$INSTALL_DIR/fonts/"
+if [ -d "/opt/SuperApp/src/main/resources/fonts" ]; then
+    cp -r /opt/SuperApp/src/main/resources/fonts/* "$INSTALL_DIR/fonts/"
+else
+    echo "Каталог '/opt/SuperApp/src/main/resources/fonts' не существует. Пропускаем копирование шрифтов."
+fi
 
 # Добавляем приложение в меню приложений
 DESKTOP_ENTRY="[Desktop Entry]
