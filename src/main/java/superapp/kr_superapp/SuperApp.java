@@ -6,22 +6,33 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class SuperApp extends Application {
-    private static final String HOME_DIR = System.getProperty("user.home") + "/SuperApp/home";
-    private static final String TRASH_DIR = System.getProperty("user.home") + "/SuperApp/trash";
-    private static final String FONTS_DIR = System.getProperty("user.home") + "/SuperApp/fonts";
-    private static final String JAVA_FX_LIB = System.getProperty("user.home") + "/SuperApp/javafx/lib";
-    private static final String INSTALL_FLAG = System.getProperty("user.home") + "/SuperApp/.installed";
+    private static final String BASE_DIR = System.getProperty("user.home") + "/SuperApp";
+    private static final String HOME_DIR = BASE_DIR + "/home";
+    private static final String TRASH_DIR = BASE_DIR + "/trash";
+    private static final String FONTS_DIR = BASE_DIR + "/fonts";
+    private static final String JAVA_FX_LIB = BASE_DIR + "/javafx/lib";
+    private static final String INSTALL_FLAG = BASE_DIR + "/.installed";
+    private static final String LOCK_FILE = BASE_DIR + "/.lock";
 
     @Override
     public void start(Stage stage) throws IOException {
         // Установка иконки приложения
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/superapp/kr_superapp/icons/Icon_SuperApp.png")));
+
+        // Проверка наличия блокировки
+        if (isAppRunning()) {
+            System.out.println("Приложение уже запущено.");
+            System.exit(1);
+        } else {
+            createLockFile();
+        }
 
         // Создание необходимых директорий, если они не существуют
         Files.createDirectories(Paths.get(HOME_DIR));
@@ -34,6 +45,10 @@ public class SuperApp extends Application {
         } else {
             showMainWindow(stage);
         }
+
+        stage.setOnCloseRequest(event -> {
+            deleteLockFile();
+        });
     }
 
     private boolean isInstalled() {
@@ -67,6 +82,26 @@ public class SuperApp extends Application {
         stage.setScene(scene);
         stage.show();
         stage.setResizable(false);
+    }
+
+    private boolean isAppRunning() {
+        return Files.exists(Paths.get(LOCK_FILE));
+    }
+
+    private void createLockFile() {
+        try {
+            Files.createFile(Paths.get(LOCK_FILE));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteLockFile() {
+        try {
+            Files.deleteIfExists(Paths.get(LOCK_FILE));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
