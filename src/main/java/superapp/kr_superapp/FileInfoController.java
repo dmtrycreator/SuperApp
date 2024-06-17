@@ -14,16 +14,16 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileOwnerAttributeView;
 
 /**
- * Класс FileInfoController отвечает за отображение подробной информации о файлах.
- * Он предоставляет методы для установки информации о файлах и отображает
- * эту информацию в удобном для пользователя формате.
+ * Класс FileInfoController отвечает за отображение подробной информации о файлах, процессах
+ * и процессорах. Он предоставляет методы для установки информации о файлах, процессах и процессорах,
+ * и отображает эту информацию в удобном для пользователя формате.
  *
- * The FileInfoController class is responsible for displaying detailed information about files.
- * It provides methods for setting file information and displays this information
- * in a user-friendly format.
+ * The FileInfoController class is responsible for displaying detailed information about files, processes,
+ * and processors. It provides methods for setting file, process, and processor information, and displays
+ * this information in a user-friendly format.
  *
- * <p>Автор: Дмитрий Задисенцев</p>
- * <p>Version: 1.0</p>
+ *  * <p>Автор: Дмитрий Задисенцев</p>
+ *  * <p>Version: 1.0</p>
  */
 public class FileInfoController {
 
@@ -138,13 +138,140 @@ public class FileInfoController {
     }
 
     /**
-     * Возвращает правильное русское окончание для слова "элемент".
+     * Устанавливает и отображает информацию о процессе.
      *
-     * Returns the correct Russian ending for the word "элемент".
+     * Sets and displays information about a process.
      *
-     * @param count количество элементов / number of items
-     * @return правильное окончание / correct ending
+     * @param process Информация о процессе / The process information
      */
+    public void setProcessInfo(ProcessInfo process) {
+
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(24);
+        imageView.setFitHeight(24);
+        Image icon = new Image(getClass().getResourceAsStream("icons/Process.png"));
+        imageView.setImage(icon);
+
+        Text processNameText = new Text(process.getName());
+        processNameText.setStyle("-fx-font-size: 14; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #F5FAFF;");
+        processNameText.setWrappingWidth(240);
+
+        fileNameAndIconHBox.getChildren().addAll(imageView, processNameText);
+
+        // Загрузка информации о процессе
+        Text pidTextTitle = new Text("PID");
+        pidTextTitle.setStyle("-fx-font-size: 12; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #83888B;");
+        Text pidText = new Text(String.valueOf(process.getPid()));
+        pidText.setStyle("-fx-font-size: 14; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #F5FAFF;");
+        pidText.setWrappingWidth(240);
+        VBox pidVBox = new VBox(pidTextTitle, pidText);
+        secondVBox.getChildren().add(pidVBox);
+
+        Text cpuTextTitle = new Text("CPU Usage (%)");
+        cpuTextTitle.setStyle("-fx-font-size: 12; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #83888B;");
+        Text cpuText = new Text(String.format("%.2f%%", process.getCpuUsage()));
+        cpuText.setStyle("-fx-font-size: 14; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #F5FAFF;");
+        cpuText.setWrappingWidth(240);
+        VBox cpuVBox = new VBox(cpuTextTitle, cpuText);
+        secondVBox.getChildren().add(cpuVBox);
+
+        Text memoryTextTitle = new Text("Memory Usage (MB)");
+        memoryTextTitle.setStyle("-fx-font-size: 12; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #83888B;");
+        Text memoryText = new Text(String.format("%.2f MB", process.getMemoryUsage()));
+        memoryText.setStyle("-fx-font-size: 14; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #F5FAFF;");
+        memoryText.setWrappingWidth(240);
+        VBox memoryVBox = new VBox(memoryTextTitle, memoryText);
+        secondVBox.getChildren().add(memoryVBox);
+
+        // Загрузка состояния процесса
+        Text stateTextTitle = new Text("Состояние");
+        stateTextTitle.setStyle("-fx-font-size: 12; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #83888B;");
+        Text stateText = new Text(process.getState());
+        stateText.setStyle("-fx-font-size: 14; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #F5FAFF;");
+        stateText.setWrappingWidth(240);
+        VBox stateVBox = new VBox(stateTextTitle, stateText);
+        thirdVBox.getChildren().add(stateVBox);
+
+        // Загрузка приоритета процесса
+        Text priorityTextTitle = new Text("Приоритет");
+        priorityTextTitle.setStyle("-fx-font-size: 12; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #83888B;");
+        Text priorityText = new Text(String.valueOf(process.getPriority()));
+        priorityText.setStyle("-fx-font-size: 14; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #F5FAFF;");
+        priorityText.setWrappingWidth(240);
+        VBox priorityVBox = new VBox(priorityTextTitle, priorityText);
+        thirdVBox.getChildren().add(priorityVBox);
+
+        // Загрузка времени запуска процесса
+        Text startedTextTitle = new Text("Запущен");
+        startedTextTitle.setStyle("-fx-font-size: 12; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #83888B;");
+        Text startedText = new Text(Util.formatDate(process.getStartTime()));
+        startedText.setStyle("-fx-font-size: 14; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #F5FAFF;");
+        startedText.setWrappingWidth(240);
+        VBox startedVBox = new VBox(startedTextTitle, startedText);
+        thirdVBox.getChildren().add(startedVBox);
+    }
+
+    /**
+     * Устанавливает и отображает информацию о процессоре.
+     *
+     * Sets and displays information about a processor.
+     *
+     * @param details Информация о процессоре / The processor details
+     */
+    public void setProcessorInfo(ProcessorDetails details) {
+
+        // Загрузка иконки и имени процессора
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(24);
+        imageView.setFitHeight(24);
+        Image icon = new Image(getClass().getResourceAsStream("icons/Processor.png"));
+        imageView.setImage(icon);
+
+        Text processorInfoText = new Text("Информация о процессоре");
+        processorInfoText.setStyle("-fx-font-size: 14; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #F5FAFF;");
+        processorInfoText.setWrappingWidth(240);
+
+        fileNameAndIconHBox.getChildren().addAll(imageView, processorInfoText);
+
+        // Заполнение secondVBox
+        addProcessorInfoToVBox(secondVBox, "Имя", details.getName());
+        addProcessorInfoToVBox(secondVBox, "Производитель", details.getVendor());
+        addProcessorInfoToVBox(secondVBox, "Семейство", details.getFamily());
+        addProcessorInfoToVBox(secondVBox, "Модель", details.getModel());
+        addProcessorInfoToVBox(secondVBox, "Степпинг", details.getStepping());
+        addProcessorInfoToVBox(secondVBox, "Идентификатор процессора", details.getProcessorID());
+
+        // Заполнение thirdVBox
+        addProcessorInfoToVBox(thirdVBox, "Идентификатор", details.getIdentifier());
+        addProcessorInfoToVBox(thirdVBox, "Микроархитектура", details.getMicroarchitecture());
+        addProcessorInfoToVBox(thirdVBox, "Логические процессоры", String.valueOf(details.getLogicalProcessorCount()));
+        addProcessorInfoToVBox(thirdVBox, "Физические процессоры", String.valueOf(details.getPhysicalProcessorCount()));
+        addProcessorInfoToVBox(thirdVBox, "Максимальная частота", String.valueOf(details.getMaxFreq()) + " Hz");
+        addProcessorInfoToVBox(thirdVBox, "Текущая частота", String.valueOf(details.getCurrentFreq()) + " Hz");
+    }
+
+    /**
+     * Добавляет информацию о процессоре в указанный VBox.
+     *
+     * Adds processor information to the specified VBox.
+     *
+     * @param vbox VBox для добавления информации / VBox to add the information to
+     * @param title Название информации / The title of the information
+     * @param value Значение информации / The value of the information
+     */
+    private void addProcessorInfoToVBox(VBox vbox, String title, String value) {
+        Text titleText = new Text(title);
+        titleText.setStyle("-fx-font-size: 12; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #83888B;");
+        titleText.setWrappingWidth(240);
+
+        Text valueText = new Text(value);
+        valueText.setStyle("-fx-font-size: 14; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #F5FAFF;");
+        valueText.setWrappingWidth(240);
+
+        VBox infoVBox = new VBox(titleText, valueText);
+        vbox.getChildren().add(infoVBox);
+    }
+
     public String getCorrectRussianEnding(long count) {
         if (count % 10 == 1 && count % 100 != 11) {
             return "";
@@ -153,51 +280,5 @@ public class FileInfoController {
         } else {
             return "ов";
         }
-    }
-
-    /**
-     * Устанавливает информацию о процессоре и отображает ее.
-     *
-     * Sets and displays processor information.
-     *
-     * @param processorDetails Информация о процессоре / Processor details
-     */
-    public void setProcessorInfo(ProcessorDetails processorDetails) {
-        // Очистка текущей информации
-        secondVBox.getChildren().clear();
-
-        // Добавление информации о процессоре
-        Text processorTitle = new Text("Информация о процессоре");
-        processorTitle.setStyle("-fx-font-size: 12; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #83888B;");
-
-        Text processorInfo = new Text(processorDetails.toString());
-        processorInfo.setStyle("-fx-font-size: 14; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #F5FAFF;");
-        processorInfo.setWrappingWidth(240);
-
-        VBox processorVBox = new VBox(processorTitle, processorInfo);
-        secondVBox.getChildren().add(processorVBox);
-    }
-
-    /**
-     * Устанавливает информацию о процессе и отображает ее.
-     *
-     * Sets and displays process information.
-     *
-     * @param processInfo Информация о процессе / Process information
-     */
-    public void setProcessInfo(ProcessInfo processInfo) {
-        // Очистка текущей информации
-        secondVBox.getChildren().clear();
-
-        // Добавление информации о процессе
-        Text processTitle = new Text("Информация о процессе");
-        processTitle.setStyle("-fx-font-size: 12; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #83888B;");
-
-        Text processInfoText = new Text(processInfo.toString());
-        processInfoText.setStyle("-fx-font-size: 14; -fx-font-family: Inter; -fx-font-weight: 500; -fx-fill: #F5FAFF;");
-        processInfoText.setWrappingWidth(240);
-
-        VBox processVBox = new VBox(processTitle, processInfoText);
-        secondVBox.getChildren().add(processVBox);
     }
 }
