@@ -10,22 +10,22 @@ if [ -d "/opt/SuperApp" ]; then
 fi
 
 # Клонирование репозитория
-git clone https://github.com/dmtrycreatorE/SuperApp.git /opt/SuperApp
+sudo git clone https://github.com/dmtrycreator/SuperApp.git /opt/SuperApp
 
 # Переход в директорию проекта
 cd /opt/SuperApp
 
 # Компиляция проекта с помощью Maven
-mvn clean package
+sudo mvn clean package
 
 # Установка шрифтов
 mkdir -p ~/.fonts
-cp -r lib/fonts/* ~/.fonts
+cp -r /opt/SuperApp/lib/fonts/* ~/.fonts
 
 # Копирование исполняемых файлов
-sudo cp src/main/Process.sh /usr/local/bin/Process.sh
-sudo cp src/main/System.sh /usr/local/bin/System.sh
-sudo cp src/main/Terminal.sh /usr/local/bin/Terminal.sh
+sudo cp /opt/SuperApp/src/main/Process.sh /usr/local/bin/Process.sh
+sudo cp /opt/SuperApp/src/main/System.sh /usr/local/bin/System.sh
+sudo cp /opt/SuperApp/src/main/Terminal.sh /usr/local/bin/Terminal.sh
 
 # Добавление приложения в меню
 DESKTOP_ENTRY="[Desktop Entry]
@@ -46,7 +46,7 @@ BASHRC="$HOME/.bashrc"
 mkdir -p "$INSTALL_DIR/scripts"
 
 # Копируем файлы в установочную директорию
-cp -r scripts/* "$INSTALL_DIR/scripts/"
+cp -r /opt/SuperApp/scripts/* "$INSTALL_DIR/scripts/"
 
 # Добавляем команды в .bashrc, если они еще не добавлены
 if ! grep -q "source $INSTALL_DIR/scripts/custom_bashrc" "$BASHRC"; then
