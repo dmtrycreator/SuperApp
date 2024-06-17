@@ -45,22 +45,23 @@ public class InstallController {
             return;
         }
 
-        try {
-            Path installPath = Paths.get(directory);
-            Files.createDirectories(installPath.resolve("src/main/home"));
-            Files.createDirectories(installPath.resolve("src/main/trash"));
-            Files.createDirectories(installPath.resolve("src/main/fonts"));
-            Files.createDirectories(installPath.resolve("src/main/javafx/lib"));
+try {
+    Path installPath = Paths.get(directory);
+    Files.createDirectories(installPath.resolve(HOME_DIR));
+    Files.createDirectories(installPath.resolve(TRASH_DIR));
+    Files.createDirectories(installPath.resolve(FONTS_DIR));
+    Files.createDirectories(installPath.resolve(JAVA_FX_LIB));
 
-            // Создание файла флага установки
-            Files.createFile(installPath.resolve("src/main/.installed"));
+    // Создание файла флага установки
+    Files.createFile(installPath.resolve(INSTALL_FLAG));
 
-            statusLabel.setText("Установка успешна!");
-            statusLabel.setStyle("-fx-text-fill: #2CB67D;");
-        } catch (IOException e) {
-            e.printStackTrace();
-            statusLabel.setText("Установка не удалась: " + e.getMessage());
-        }
+    statusLabel.setText("Установка завершена успешно!"); // Переведено на русский и изменен цвет
+    statusLabel.setStyle("-fx-text-fill: #2CB67D;");
+} catch (IOException e) {
+    e.printStackTrace();
+    statusLabel.setText("Ошибка установки: " + e.getMessage());
+}
+
     }
 
     public void setStage(Stage stage) {
