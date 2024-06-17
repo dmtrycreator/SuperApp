@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<StackPane fx:id="stackMain" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="superapp.kr_superapp.SystemInfo">
+   <children>
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="540.0" prefWidth="960.0" spacing="10.0" style="-fx-background-color: #1E1E1E;">
+         <children>
+            <Pane prefHeight="62.0" prefWidth="940.0" style="-fx-background-color: #272727; -fx-background-radius: 12;">
+               <children>
+                  <Label layoutX="25.0" layoutY="20.0" text="Информация о системе" textFill="#f5faff">
+                     <font>
+                        <Font name="Inter SemiBold" size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+            </Pane>
+            <Pane prefHeight="392.0" prefWidth="940.0" style="-fx-background-color: #272727; -fx-background-radius: 12;">
+               <children>
+                  <VBox layoutX="92.0" layoutY="27.0" prefHeight="313.0" prefWidth="755.0" spacing="58.0">
+                     <children>
+                        <VBox prefWidth="548.0" spacing="16.0">
+                           <children>
+                              <Label text="Время работы ОС" textFill="#83888b">
+                                 <font>
+                                    <Font name="Inter Regular" size="16.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="timeOSLabel" text="ЧЧ:ММ:СС" textFill="#f5faff">
+                                 <font>
+                                    <Font name="Inter SemiBold" size="24.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                        <HBox alignment="BOTTOM_LEFT" prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <VBox alignment="BOTTOM_LEFT" spacing="16.0">
+                                 <children>
+                                    <Label text="Информация о процессоре" textFill="#83888b">
+                                       <font>
+                                          <Font name="Inter Regular" size="16.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="processorLabel" text="Intel" textFill="#f5faff">
+                                       <font>
+                                          <Font name="Inter SemiBold" size="24.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </VBox>
+                              <Button fx:id="aboutProcessorButton" mnemonicParsing="false" style="-fx-background-color: #272727; -fx-border-color: #272727;" text="Узнать подробнее" textFill="#469ee9">
+                                 <font>
+                                    <Font name="Inter SemiBold" size="16.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                                 <padding>
+                                    <Insets bottom="4.0" left="30.0" right="30.0" top="4.0" />
+                                 </padding>
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                              </Button>
+                           </children>
+                        </HBox>
+                        <VBox spacing="16.0">
+                           <children>
+                              <HBox>
+                                 <children>
+                                    <Label text="Количество модулей, используемых процессом: " textFill="#83888b">
+                                       <font>
+                                          <Font name="Inter Regular" size="16.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="processLabel" text="Процесс" textFill="#469ee9">
+                                       <font>
+                                          <Font name="Inter SemiBold" size="16.0" />
+                                       </font>
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <Label fx:id="countModuleLabel" text="X" textFill="#f5faff">
+                                 <font>
+                                    <Font name="Inter SemiBold" size="24.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+               </children>
+            </Pane>
+            <HBox prefHeight="46.0" prefWidth="940.0" spacing="10.0">
+               <children>
+                  <Pane prefHeight="46.0" prefWidth="435.0" style="-fx-background-color: #272727; -fx-background-radius: 12;">
+                     <children>
+                        <Label fx:id="statusLabel" layoutX="25.0" layoutY="14.0" text="Состояние" textFill="#f5faff">
+                           <font>
+                              <Font name="Inter Regular" size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </Pane>
+                  <MenuBar fx:id="settingsMenu" prefHeight="46.0" prefWidth="145.0" style="-fx-background-color: #272727; -fx-border-color: #272727; -fx-background-radius: 12; -fx-border-radius: 12; -fx-text-fill: #469EE9;">
+                     <menus>
+                        <Menu fx:id="menu_settings" mnemonicParsing="false" style="-fx-text-fill: #469ee9;" text="Параметры">
+                           <items>
+                              <MenuItem fx:id="reportMenuItem" mnemonicParsing="false" text="Отчёт" />
+                           </items>
+                        </Menu>
+                     </menus>
+                     <padding>
+                        <Insets left="25.0" top="9.0" />
+                     </padding>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </MenuBar>
+                  <Button fx:id="changeProcessButton" mnemonicParsing="false" prefHeight="46.0" style="-fx-background-color: #272727; -fx-border-color: #272727; -fx-background-radius: 12; -fx-border-radius: 12;" text="Поменять процесс" textAlignment="CENTER" textFill="#469ee9">
+                     <font>
+                        <Font name="Inter Regular" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets left="32.0" right="32.0" />
+                     </padding>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <Button fx:id="restartButton" mnemonicParsing="false" prefHeight="46.0" style="-fx-background-color: #469ee9; -fx-border-color: #469ee9; -fx-background-radius: 12; -fx-border-radius: 12;" text="Обновить" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font name="Inter Regular" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets left="32.0" right="32.0" />
+                     </padding>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+               </children>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </VBox>
+   </children>
+</StackPane>
