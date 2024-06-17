@@ -20,7 +20,7 @@ sudo mvn clean package
 
 # Установка шрифтов
 mkdir -p ~/.fonts
-cp -r /opt/SuperApp/lib/fonts/* ~/.fonts
+cp -r /opt/SuperApp/src/main/fonts/* ~/.fonts
 
 # Установка JavaFX
 sudo mkdir -p /opt/javafx
