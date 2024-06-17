@@ -22,6 +22,11 @@ mvn clean package
 mkdir -p ~/.fonts
 cp -r lib/fonts/* ~/.fonts
 
+# Копирование исполняемых файлов
+sudo cp src/main/Process.sh /usr/local/bin/Process.sh
+sudo cp src/main/System.sh /usr/local/bin/System.sh
+sudo cp src/main/Terminal.sh /usr/local/bin/Terminal.sh
+
 # Добавление приложения в меню
 DESKTOP_ENTRY="[Desktop Entry]
 Version=1.0
