@@ -7,7 +7,7 @@ SuperApp - это кроссплатформенное приложение, к�
 
 1. Клонируйте репозиторий и выполните скрипт установки:
     ```sh
-    git clone https://github.com/dmtycreator/SuperApp.git
+    git clone https://github.com/dmtrycreator/SuperApp.git
     cd SuperApp/lib/install
     chmod +x install.sh
     ./install.sh
