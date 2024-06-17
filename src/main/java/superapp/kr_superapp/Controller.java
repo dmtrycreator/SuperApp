@@ -2,14 +2,13 @@ package superapp.kr_superapp;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -20,10 +19,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Objects;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Stream;
+import java.nio.file.LinkOption;
+
 
 /**
  * Этот класс управляет основным представлением приложения файлового менеджера.
@@ -135,23 +140,12 @@ public class Controller {
     private DragAndDropHandler dragAndDropHandler;
     private MenuHandler menuHandler;
     private FileBrowserHandler fileBrowserHandler;
-    private static final File rootDirectory = new File("src/main/home");
+    private static final File rootDirectory = new File("system/home");
     private static StringBuilder logBuilder = new StringBuilder();
 
     private static Controller instance;
 
     private Comparator<Path> currentComparator = Comparator.comparing(path -> path.toFile().lastModified());
-
-    // Константы для директорий установки
-    private static final String HOME_DIR = "system/home";
-    private static final String TRASH_DIR = "system/trash";
-    private static final String FONTS_DIR = "system/fonts";
-    private static final String JAVA_FX_LIB = "system/javafx/lib";
-    private static final String INSTALL_FLAG = "system/.installed";
-
-    // URL репозитория GitHub и временная директория
-    private static final String GITHUB_REPO_URL = "https://github.com/YOUR-USERNAME/SuperApp.git";
-    private static final String TEMP_DIR = "system/temp";
 
     /**
      * Конструктор для создания и инициализации Controller.
@@ -214,7 +208,7 @@ public class Controller {
         });
 
         systemPane.setOnMouseClicked(event -> {
-            updateDirectoryHBox("src/main");
+            updateDirectoryHBox("system");
             switchToSystemHandler();
             log("\"Система\" нажата");
             setStatusMessage("Просмотр системных файлов");
@@ -295,7 +289,20 @@ public class Controller {
         logBuilder.append(LocalTime.now()).append(" - ").append(message).append("\n");
     }
 
-
+    /**
+     * Устанавливает сообщение статуса.
+     *
+     * Sets the status message.
+     *
+     * @param message сообщение статуса / status message
+     */
+    public void setStatusMessage(String message) {
+        if (statusLabel != null) {
+            statusLabel.setText(message);
+        } else {
+            System.err.println("statusLabel is not initialized");
+        }
+    }
     /**
      * Показывает оверлей для создания нового файла.
      *
@@ -430,7 +437,7 @@ public class Controller {
     public void updateDirectoryHBox(String directoryPath) {
         directory.getChildren().clear();
 
-        if (directoryPath.equals("src/main")) {
+        if (directoryPath.equals("system")) {
             Label systemLabel = new Label("System: доступ ограничен");
             systemLabel.setStyle("-fx-text-fill: #83888B; -fx-font-size: 16; -fx-font-family: Inter; -fx-font-weight: 500;");
             directory.getChildren().add(systemLabel);
@@ -465,7 +472,7 @@ public class Controller {
 
                 Label homeLabel = new Label("home");
                 homeLabel.setStyle("-fx-text-fill: #83888B; -fx-font-size: 16; -fx-font-family: Inter; -fx-font-weight: 500;");
-                homeLabel.setOnMouseClicked(event -> navigateToDirectory("src/main/home"));
+                homeLabel.setOnMouseClicked(event -> navigateToDirectory("system/home"));
                 directory.getChildren().add(homeLabel);
 
                 if (!relativePath.equals("home")) {
@@ -476,7 +483,7 @@ public class Controller {
 
                     if (!relativePath.isEmpty()) {
                         String[] pathComponents = relativePath.split(File.separator);
-                        StringBuilder fullPath = new StringBuilder("src/main/home");
+                        StringBuilder fullPath = new StringBuilder("system/home");
 
                         for (String component : pathComponents) {
                             if (!component.isEmpty()) {
