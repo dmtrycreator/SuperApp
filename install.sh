@@ -78,5 +78,4 @@ fi
 source "$BASHRC"
 
 # Уведомление об успешной установке
-echo "Установка завершена. Перезапустите терминал или выполните 'source ~/.bashrc' для применения изменений."
-echo "Вы можете запустить приложение из меню или командой: java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar /opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT-shaded.jar"
+echo "Вы можете запустить приложение из меню или командой: java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar /opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar"
