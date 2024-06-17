@@ -34,6 +34,7 @@ import java.util.concurrent.Semaphore;
  * <p>Author: Дмитрий Задисенцев</p>
  * <p>Version: 1.0</p>
  */
+
 public class TerminalController {
 
     @FXML
@@ -344,7 +345,7 @@ public class TerminalController {
                 cp <src> <dest> - Копирует файл или директорию.
                 mv <src> <dest> - Перемещает файл или директорию.
                 cat <file> - Выводит содержимое файла.
-        """;
+            """;
     }
 
     public void executeCommandAsync(String command) {
@@ -368,13 +369,12 @@ public class TerminalController {
     private void handleTerminalShortcut() {
         statusLabel.setText("Клавиши нажаты"); // Подтверждение нажатия клавиш
         try {
-            String customBashrcPath = new File("scripts/custom_bashrc").getAbsolutePath();
             ProcessBuilder pb = new ProcessBuilder(
                     "gnome-terminal",
                     "--",
                     "/bin/bash",
                     "--rcfile",
-                    customBashrcPath
+                    System.getProperty("user.home") + "/.superapp/scripts/custom_bashrc"
             );
             pb.start();
         } catch (IOException e) {
