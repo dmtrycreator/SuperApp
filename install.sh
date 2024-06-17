@@ -24,7 +24,7 @@ mvn clean package
 # Установка шрифтов (если есть)
 if [ -d "$PROJECT_DIR/src/main/resources/fonts" ]; then
     mkdir -p ~/.fonts
-    cp -r "$PROJECT_DIR/src/main/resources/fonts/*" ~/.fonts
+    cp -r "$PROJECT_DIR/src/main/resources/fonts/"* ~/.fonts
 else
     echo "Каталог шрифтов не существует. Пропускаем копирование шрифтов."
 fi
@@ -35,21 +35,15 @@ sudo mkdir -p "$JAVA_FX_DIR"
 cd "$JAVA_FX_DIR"
 sudo curl -L -o openjfx.zip https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_linux-x64_bin-sdk.zip
 sudo unzip -o openjfx.zip
-sudo mv javafx-sdk-22.0.1/lib ./lib
+sudo mv javafx-sdk-22.0.1/lib/* ./lib
 sudo rm -rf javafx-sdk-22.0.1 openjfx.zip
 
 # Копирование исполняемых файлов (если есть)
-if [ -f "$PROJECT_DIR/src/main/Process.sh" ]; then
-    sudo cp "$PROJECT_DIR/src/main/Process.sh" /usr/local/bin/Process.sh
-fi
-
-if [ -f "$PROJECT_DIR/src/main/System.sh" ]; then
-    sudo cp "$PROJECT_DIR/src/main/System.sh" /usr/local/bin/System.sh
-fi
-
-if [ -f "$PROJECT_DIR/src/main/Terminal.sh" ]; then
-    sudo cp "$PROJECT_DIR/src/main/Terminal.sh" /usr/local/bin/Terminal.sh
-fi
+for script in Process.sh System.sh Terminal.sh; do
+    if [ -f "$PROJECT_DIR/src/main/$script" ]; then
+        sudo cp "$PROJECT_DIR/src/main/$script" /usr/local/bin/$script
+    fi
+done
 
 # Добавление приложения в меню
 DESKTOP_ENTRY="[Desktop Entry]
@@ -71,7 +65,7 @@ mkdir -p "$INSTALL_DIR/scripts"
 
 # Копируем файлы в установочную директорию (если есть)
 if [ -d "$PROJECT_DIR/scripts" ]; then
-    cp -r "$PROJECT_DIR/scripts/*" "$INSTALL_DIR/scripts/"
+    cp -r "$PROJECT_DIR/scripts/"* "$INSTALL_DIR/scripts/"
 fi
 
 # Добавляем команды в .bashrc, если они еще не добавлены
