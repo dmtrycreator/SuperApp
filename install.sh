@@ -20,10 +20,10 @@ sudo mvn clean package
 
 # Установка шрифтов
 mkdir -p ~/.fonts
-if [ -d "/opt/SuperApp/src/main/fonts" ]; then
-    cp -r /opt/SuperApp/src/main/fonts/* ~/.fonts
+if [ -d "/opt/SuperApp/src/main/resources/fonts" ]; then
+    cp -r /opt/SuperApp/src/main/resources/fonts/* ~/.fonts
 else
-    echo "Каталог '/opt/SuperApp/src/main/fonts' не существует. Пропускаем копирование шрифтов."
+    echo "Каталог '/opt/SuperApp/src/main/resources/fonts' не существует. Пропускаем копирование шрифтов."
 fi
 
 # Установка JavaFX
