@@ -23,11 +23,12 @@ public class InstallController {
     private Stage stage;
 
     // Константы для директорий установки
-    private static final String HOME_DIR = System.getProperty("user.home") + "/SuperApp/home";
-    private static final String TRASH_DIR = System.getProperty("user.home") + "/SuperApp/trash";
-    private static final String FONTS_DIR = System.getProperty("user.home") + "/SuperApp/fonts";
-    private static final String JAVA_FX_LIB = System.getProperty("user.home") + "/SuperApp/javafx/lib";
-    private static final String INSTALL_FLAG = System.getProperty("user.home") + "/SuperApp/.installed";
+    private static final String BASE_DIR = System.getProperty("user.home") + "/SuperApp";
+    private static final String HOME_DIR = BASE_DIR + "/home";
+    private static final String TRASH_DIR = BASE_DIR + "/trash";
+    private static final String FONTS_DIR = BASE_DIR + "/fonts";
+    private static final String JAVA_FX_LIB = BASE_DIR + "/javafx/lib";
+    private static final String INSTALL_FLAG = BASE_DIR + "/.installed";
 
     @FXML
     private void initialize() {
@@ -54,13 +55,13 @@ public class InstallController {
 
         try {
             Path installPath = Paths.get(directory);
-            Files.createDirectories(installPath.resolve("home"));
-            Files.createDirectories(installPath.resolve("trash"));
-            Files.createDirectories(installPath.resolve("fonts"));
-            Files.createDirectories(installPath.resolve("javafx/lib"));
+            Files.createDirectories(installPath.resolve(HOME_DIR));
+            Files.createDirectories(installPath.resolve(TRASH_DIR));
+            Files.createDirectories(installPath.resolve(FONTS_DIR));
+            Files.createDirectories(installPath.resolve(JAVA_FX_LIB));
 
             // Создание файла флага установки
-            Files.createFile(installPath.resolve(".installed"));
+            Files.createFile(installPath.resolve(INSTALL_FLAG));
 
             statusLabel.setText("Установка завершена успешно!");
             statusLabel.setStyle("-fx-text-fill: #2CB67D;");
