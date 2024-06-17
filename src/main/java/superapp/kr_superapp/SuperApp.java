@@ -35,6 +35,7 @@ public class SuperApp extends Application {
         return Files.exists(Paths.get(INSTALL_FLAG));
     }
 
+
     private void showInstallationWindow(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(SuperApp.class.getResource("install.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
