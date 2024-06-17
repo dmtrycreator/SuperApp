@@ -13,11 +13,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class SuperApp extends Application {
-    private static final String HOME_DIR = "src/main/home";
-    private static final String TRASH_DIR = "src/main/trash";
-    private static final String FONTS_DIR = "src/main/fonts";
-    private static final String JAVA_FX_LIB = "src/main/javafx/lib";
-private static final String INSTALL_FLAG = "src/main/.installed";
+    private static final String HOME_DIR = System.getProperty("user.home") + "/SuperApp/home";
+    private static final String TRASH_DIR = System.getProperty("user.home") + "/SuperApp/trash";
+    private static final String FONTS_DIR = System.getProperty("user.home") + "/SuperApp/fonts";
+    private static final String JAVA_FX_LIB = System.getProperty("user.home") + "/SuperApp/javafx/lib";
+    private static final String INSTALL_FLAG = System.getProperty("user.home") + "/SuperApp/.installed";
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -34,7 +34,6 @@ private static final String INSTALL_FLAG = "src/main/.installed";
     private boolean isInstalled() {
         return Files.exists(Paths.get(INSTALL_FLAG));
     }
-
 
     private void showInstallationWindow(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(SuperApp.class.getResource("install.fxml"));
