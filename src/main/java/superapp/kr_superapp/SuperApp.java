@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,7 +43,7 @@ public class SuperApp extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(SuperApp.class.getResource("main.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
 
-        String css = this.getClass().getResource("style.css").toExternalForm();
+        String css = this.getClass().getResource("/superapp/kr_superapp/style.css").toExternalForm();
         if (css != null) {
             scene.getStylesheets().add(css);
         } else {
