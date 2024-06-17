@@ -6,7 +6,6 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +22,12 @@ public class SuperApp extends Application {
     public void start(Stage stage) throws IOException {
         // Установка иконки приложения
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/superapp/kr_superapp/icons/Icon_SuperApp.png")));
+
+        // Создание необходимых директорий, если они не существуют
+        Files.createDirectories(Paths.get(HOME_DIR));
+        Files.createDirectories(Paths.get(TRASH_DIR));
+        Files.createDirectories(Paths.get(FONTS_DIR));
+        Files.createDirectories(Paths.get(JAVA_FX_LIB));
 
         if (!isInstalled()) {
             showInstallationWindow(stage);
