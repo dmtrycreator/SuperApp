@@ -23,12 +23,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Stream;
-import java.nio.file.LinkOption;
-
 
 /**
  * Этот класс управляет основным представлением приложения файлового менеджера.
@@ -303,6 +298,7 @@ public class Controller {
             System.err.println("statusLabel is not initialized");
         }
     }
+
     /**
      * Показывает оверлей для создания нового файла.
      *
@@ -570,7 +566,7 @@ public class Controller {
      *
      * Updates the trash label with the number of items.
      */
-    private void updateTrashLabel() {
+    public void updateTrashLabel() {
         try (Stream<Path> files = Files.list(Paths.get("system/trash"))) {
             long itemCount = files.count();
             trashLabel.setText("Корзина (" + itemCount + ")");
@@ -592,5 +588,13 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public Path getRootDirectory() {
+        return Paths.get(rootDirectory.getPath());
+    }
+
+    public TreeView<String> getFileTreeTable() {
+        return (TreeView<String>) fileBrowserTreeView;
     }
 }
