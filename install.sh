@@ -22,18 +22,18 @@ sudo mvn clean package
 mkdir -p ~/.fonts
 cp -r /opt/SuperApp/lib/fonts/* ~/.fonts
 
-# Загрузка и установка JavaFX
-JAVA_FX_VERSION="17.0.2"
-curl -Lo openjfx.zip "https://gluonhq.com/download/javafx-${JAVA_FX_VERSION}-linux/"
-sudo unzip openjfx.zip -d /opt/javafx
+# Установка JavaFX
+sudo mkdir -p /opt/javafx
+cd /opt/javafx
+sudo curl -L -o openjfx.zip https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_linux-x64_bin-sdk.zip
+sudo unzip openjfx.zip
+sudo mv javafx-sdk-22.0.1/lib ./
+sudo rm -rf javafx-sdk-22.0.1 openjfx.zip
 
-# Копирование исполняемых файлов и установка прав
+# Копирование исполняемых файлов
 sudo cp /opt/SuperApp/src/main/Process.sh /usr/local/bin/Process.sh
 sudo cp /opt/SuperApp/src/main/System.sh /usr/local/bin/System.sh
 sudo cp /opt/SuperApp/src/main/Terminal.sh /usr/local/bin/Terminal.sh
-sudo chmod +x /usr/local/bin/Process.sh
-sudo chmod +x /usr/local/bin/System.sh
-sudo chmod +x /usr/local/bin/Terminal.sh
 
 # Добавление приложения в меню
 DESKTOP_ENTRY="[Desktop Entry]
