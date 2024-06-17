@@ -17,9 +17,17 @@ cd /opt/SuperApp || exit
 # Компиляция проекта с помощью Maven
 sudo mvn clean package
 
+# Создание необходимых директорий
+mkdir -p /opt/SuperApp/src/main/home
+mkdir -p /opt/SuperApp/src/main/trash
+
 # Установка шрифтов
 mkdir -p ~/.fonts
-cp -r /opt/SuperApp/src/main/resources/fonts/* ~/.fonts
+if [ -d "/opt/SuperApp/src/main/resources/fonts" ]; then
+    cp -r /opt/SuperApp/src/main/resources/fonts/* ~/.fonts
+else
+    echo "Каталог шрифтов не существует. Пропускаем копирование шрифтов."
+fi
 
 # Установка JavaFX
 sudo mkdir -p /opt/javafx
@@ -30,9 +38,11 @@ sudo mv javafx-sdk-22.0.1/lib ./lib
 sudo rm -rf javafx-sdk-22.0.1 openjfx.zip
 
 # Копирование исполняемых файлов
-sudo cp /opt/SuperApp/src/main/Process.sh /usr/local/bin/Process.sh
-sudo cp /opt/SuperApp/src/main/System.sh /usr/local/bin/System.sh
-sudo cp /opt/SuperApp/src/main/Terminal.sh /usr/local/bin/Terminal.sh
+for script in Process.sh System.sh Terminal.sh; do
+    if [ -f "/opt/SuperApp/src/main/$script" ]; then
+        sudo cp "/opt/SuperApp/src/main/$script" /usr/local/bin/$script
+    fi
+done
 
 # Добавление приложения в меню
 DESKTOP_ENTRY="[Desktop Entry]
