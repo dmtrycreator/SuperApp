@@ -23,11 +23,11 @@ public class InstallController {
     private Stage stage;
 
     // Константы для директорий установки
-    private static final String HOME_DIR = "src/main/home";
-    private static final String TRASH_DIR = "src/main/trash";
-    private static final String FONTS_DIR = "src/main/fonts";
-    private static final String JAVA_FX_LIB = "src/main/javafx/lib";
-    private static final String INSTALL_FLAG = "src/main/.installed";
+    private static final String HOME_DIR = System.getProperty("user.home") + "/SuperApp/home";
+    private static final String TRASH_DIR = System.getProperty("user.home") + "/SuperApp/trash";
+    private static final String FONTS_DIR = System.getProperty("user.home") + "/SuperApp/fonts";
+    private static final String JAVA_FX_LIB = System.getProperty("user.home") + "/SuperApp/javafx/lib";
+    private static final String INSTALL_FLAG = System.getProperty("user.home") + "/SuperApp/.installed";
 
     @FXML
     private void initialize() {
@@ -54,13 +54,13 @@ public class InstallController {
 
         try {
             Path installPath = Paths.get(directory);
-            Files.createDirectories(installPath.resolve(HOME_DIR));
-            Files.createDirectories(installPath.resolve(TRASH_DIR));
-            Files.createDirectories(installPath.resolve(FONTS_DIR));
-            Files.createDirectories(installPath.resolve(JAVA_FX_LIB));
+            Files.createDirectories(installPath.resolve("home"));
+            Files.createDirectories(installPath.resolve("trash"));
+            Files.createDirectories(installPath.resolve("fonts"));
+            Files.createDirectories(installPath.resolve("javafx/lib"));
 
             // Создание файла флага установки
-            Files.createFile(installPath.resolve(INSTALL_FLAG));
+            Files.createFile(installPath.resolve(".installed"));
 
             statusLabel.setText("Установка завершена успешно!");
             statusLabel.setStyle("-fx-text-fill: #2CB67D;");
