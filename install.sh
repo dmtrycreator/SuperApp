@@ -47,24 +47,30 @@ Categories=Utility;"
 echo "$DESKTOP_ENTRY" > ~/.local/share/applications/SuperApp.desktop
 
 # Установочные директории
-INSTALL_DIR="$HOME/.superapp"
-BASHRC="$HOME/.bashrc"
+INSTALL_DIR="$HOME/SuperApp"
 
-# Создаем директории, если их нет
-mkdir -p "$INSTALL_DIR/scripts"
+# Создаем установочные директории
+mkdir -p "$INSTALL_DIR/home"
+mkdir -p "$INSTALL_DIR/trash"
+mkdir -p "$INSTALL_DIR/fonts"
+mkdir -p "$INSTALL_DIR/javafx/lib"
 
 # Копируем файлы в установочную директорию
-cp -r /opt/SuperApp/scripts/* "$INSTALL_DIR/scripts/"
+cp -r /opt/SuperApp/src/main/resources/fonts/* "$INSTALL_DIR/fonts/"
 
-# Добавляем команды в .bashrc, если они еще не добавлены
-if ! grep -q "source $INSTALL_DIR/scripts/custom_bashrc" "$BASHRC"; then
-    echo "source $INSTALL_DIR/scripts/custom_bashrc" >> "$BASHRC"
-    echo "Пользовательские команды SuperApp добавлены в $BASHRC"
-fi
+# Добавляем приложение в меню приложений
+DESKTOP_ENTRY="[Desktop Entry]
+Version=1.0
+Name=SuperApp
+Exec=java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar $INSTALL_DIR/KR_SuperApp-1.0-SNAPSHOT.jar
+Icon=$INSTALL_DIR/src/main/resources/superapp/kr_superapp/icons/Icon_SuperApp.png
+Type=Application
+Categories=Utility;"
 
-# Применяем изменения
-source "$BASHRC"
+echo "$DESKTOP_ENTRY" > ~/.local/share/applications/SuperApp.desktop
+
+# Создание файла флага установки
+touch "$INSTALL_DIR/.installed"
 
 # Уведомление об успешной установке
-echo "Установка завершена. Перезапустите терминал или выполните 'source ~/.bashrc' для применения изменений."
-echo "Вы можете запустить приложение из меню или командой: java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar /opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar"
+echo "Установка завершена. Вы можете запустить приложение из меню или командой: java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar $INSTALL_DIR/KR_SuperApp-1.0-SNAPSHOT.jar"
