@@ -22,11 +22,12 @@ public class InstallController {
 
     private Stage stage;
 
-    private static final String HOME_DIR = System.getProperty("user.home") + "/SuperApp/home";
-    private static final String TRASH_DIR = System.getProperty("user.home") + "/SuperApp/trash";
-    private static final String FONTS_DIR = System.getProperty("user.home") + "/SuperApp/fonts";
-    private static final String JAVA_FX_LIB = System.getProperty("user.home") + "/SuperApp/javafx/lib";
-    private static final String INSTALL_FLAG = System.getProperty("user.home") + "/SuperApp/.installed";
+    // Константы для директорий установки
+    private static final String HOME_DIR = "src/main/home";
+    private static final String TRASH_DIR = "src/main/trash";
+    private static final String FONTS_DIR = "src/main/fonts";
+    private static final String JAVA_FX_LIB = "src/main/javafx/lib";
+    private static final String INSTALL_FLAG = "src/main/.installed";
 
     @FXML
     private void initialize() {
