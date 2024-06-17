@@ -2,7 +2,7 @@
 
 # Установка необходимых пакетов
 sudo apt update
-sudo apt install -y openjdk-21-jdk git maven
+sudo apt install -y openjdk-21-jdk git maven unzip
 
 # Удаление старой версии приложения, если она существует
 if [ -d "/opt/SuperApp" ]; then
@@ -22,6 +22,11 @@ sudo mvn clean package
 mkdir -p ~/.fonts
 cp -r /opt/SuperApp/lib/fonts/* ~/.fonts
 
+# Загрузка и установка JavaFX
+JAVA_FX_VERSION="17.0.2"
+curl -Lo openjfx.zip "https://gluonhq.com/download/javafx-${JAVA_FX_VERSION}-linux/"
+sudo unzip openjfx.zip -d /opt/javafx
+
 # Копирование исполняемых файлов и установка прав
 sudo cp /opt/SuperApp/src/main/Process.sh /usr/local/bin/Process.sh
 sudo cp /opt/SuperApp/src/main/System.sh /usr/local/bin/System.sh
@@ -34,7 +39,7 @@ sudo chmod +x /usr/local/bin/Terminal.sh
 DESKTOP_ENTRY="[Desktop Entry]
 Version=1.0
 Name=SuperApp
-Exec=java -jar /opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar
+Exec=java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar /opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar
 Icon=/opt/SuperApp/src/main/resources/superapp/kr_superapp/icons/Icon_SuperApp.png
 Type=Application
 Categories=Utility;"
@@ -62,4 +67,4 @@ source "$BASHRC"
 
 # Уведомление об успешной установке
 echo "Установка завершена. Перезапустите терминал или выполните 'source ~/.bashrc' для применения изменений."
-echo "Вы можете запустить приложение из меню или командой: java -jar /opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar"
+echo "Вы можете запустить приложение из меню или командой: java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar /opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar"
