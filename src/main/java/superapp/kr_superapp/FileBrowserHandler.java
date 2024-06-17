@@ -101,4 +101,6 @@ public class FileBrowserHandler {
      */
     private void clearSelection() {
         fileGridView.getSelectedFiles().clear();
-        fileGridView.getGridPane
+        fileGridView.getGridPane().getChildren().forEach(node -> node.setStyle("-fx-background-color: transparent;"));
+    }
+}
