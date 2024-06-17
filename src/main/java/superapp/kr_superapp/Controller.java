@@ -2,13 +2,14 @@ package superapp.kr_superapp;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,9 +20,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
@@ -135,12 +135,23 @@ public class Controller {
     private DragAndDropHandler dragAndDropHandler;
     private MenuHandler menuHandler;
     private FileBrowserHandler fileBrowserHandler;
-    private static final File rootDirectory = new File("system/home");
+    private static final File rootDirectory = new File("src/main/home");
     private static StringBuilder logBuilder = new StringBuilder();
 
     private static Controller instance;
 
     private Comparator<Path> currentComparator = Comparator.comparing(path -> path.toFile().lastModified());
+
+    // Константы для директорий установки
+    private static final String HOME_DIR = "system/home";
+    private static final String TRASH_DIR = "system/trash";
+    private static final String FONTS_DIR = "system/fonts";
+    private static final String JAVA_FX_LIB = "system/javafx/lib";
+    private static final String INSTALL_FLAG = "system/.installed";
+
+    // URL репозитория GitHub и временная директория
+    private static final String GITHUB_REPO_URL = "https://github.com/YOUR-USERNAME/SuperApp.git";
+    private static final String TEMP_DIR = "system/temp";
 
     /**
      * Конструктор для создания и инициализации Controller.
@@ -203,7 +214,7 @@ public class Controller {
         });
 
         systemPane.setOnMouseClicked(event -> {
-            updateDirectoryHBox("system");
+            updateDirectoryHBox("src/main");
             switchToSystemHandler();
             log("\"Система\" нажата");
             setStatusMessage("Просмотр системных файлов");
@@ -284,20 +295,6 @@ public class Controller {
         logBuilder.append(LocalTime.now()).append(" - ").append(message).append("\n");
     }
 
-    /**
-     * Устанавливает сообщение статуса.
-     *
-     * Sets the status message.
-     *
-     * @param message сообщение статуса / status message
-     */
-    public void setStatusMessage(String message) {
-        if (statusLabel != null) {
-            statusLabel.setText(message);
-        } else {
-            System.err.println("statusLabel is not initialized");
-        }
-    }
 
     /**
      * Показывает оверлей для создания нового файла.
@@ -433,7 +430,7 @@ public class Controller {
     public void updateDirectoryHBox(String directoryPath) {
         directory.getChildren().clear();
 
-        if (directoryPath.equals("system")) {
+        if (directoryPath.equals("src/main")) {
             Label systemLabel = new Label("System: доступ ограничен");
             systemLabel.setStyle("-fx-text-fill: #83888B; -fx-font-size: 16; -fx-font-family: Inter; -fx-font-weight: 500;");
             directory.getChildren().add(systemLabel);
@@ -468,7 +465,7 @@ public class Controller {
 
                 Label homeLabel = new Label("home");
                 homeLabel.setStyle("-fx-text-fill: #83888B; -fx-font-size: 16; -fx-font-family: Inter; -fx-font-weight: 500;");
-                homeLabel.setOnMouseClicked(event -> navigateToDirectory("system/home"));
+                homeLabel.setOnMouseClicked(event -> navigateToDirectory("src/main/home"));
                 directory.getChildren().add(homeLabel);
 
                 if (!relativePath.equals("home")) {
@@ -479,7 +476,7 @@ public class Controller {
 
                     if (!relativePath.isEmpty()) {
                         String[] pathComponents = relativePath.split(File.separator);
-                        StringBuilder fullPath = new StringBuilder("system/home");
+                        StringBuilder fullPath = new StringBuilder("src/main/home");
 
                         for (String component : pathComponents) {
                             if (!component.isEmpty()) {
@@ -537,64 +534,223 @@ public class Controller {
      *
      * Switches to the file grid view for the specified directory.
      *
-     * @param path путь к директории / path to the directory
+     * @param directoryPath путь к директории / path to the directory
      */
-    public void switchToFileGridView(String path) {
-        fileGridView.updateGridView(path);
+    private void switchToFileGridView(String directoryPath) {
+        fileGridView.updateGridView(directoryPath);
+        fileBrowserScrollPane.setContent(fileGridView.getGridPane());
+        log("Переключено на представление сетки файлов для директории: " + directoryPath);
+        setStatusMessage("Просмотр файлов в директории: " + directoryPath);
     }
 
     /**
-     * Переключается на обработчик системных файлов.
+     * Переключается на представление системных файлов.
      *
-     * Switches to the system handler.
+     * Switches to the system view.
      */
     private void switchToSystemHandler() {
         systemHandler.updateSystemView();
+        fileBrowserScrollPane.setContent(systemHandler.getGridPane());
+        fileBrowserScrollPane.setUserData(systemHandler);
+        log("Переключено на обработчик системы");
+        setStatusMessage("Просмотр системных файлов");
     }
 
     /**
-     * Переключается на обработчик корзины.
+     * Переключается на представление корзины.
      *
-     * Switches to the trash handler.
+     * Switches to the trash view.
      */
-    private void switchToTrashHandler() {
+    public void switchToTrashHandler() {
         trashHandler.updateTrashView();
+        fileBrowserScrollPane.setContent(trashHandler.getGridPane());
+        fileBrowserScrollPane.setUserData(trashHandler);
+        log("Переключено на обработчик корзины");
+        setStatusMessage("Просмотр корзины");
+    }
+
+    public FileGridView getFileGridView() {
+        return fileGridView;
+    }
+
+    public FileTreeTable getFileTreeTable() {
+        return fileTreeTable;
+    }
+
+    public File getRootDirectory() {
+        return rootDirectory;
     }
 
     /**
-     * Обновляет метку корзины с количеством элементов.
+     * Сохраняет отчет журнала в файл.
      *
-     * Updates the trash label with the number of items.
-     */
-    public void updateTrashLabel() {
-        try (Stream<Path> files = Files.list(Paths.get("system/trash"))) {
-            long itemCount = files.count();
-            trashLabel.setText("Корзина (" + itemCount + ")");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Сохраняет отчет с логами.
-     *
-     * Saves the log report.
+     * Saves the log report to a file.
      */
     private void saveLogReport() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("log_report.txt"))) {
-            writer.write(logBuilder.toString());
-            log("Отчет сохранен в log_report.txt");
-            setStatusMessage("Отчет сохранен");
-        } catch (IOException e) {
-            e.printStackTrace();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Сохранить отчет журнала");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+        fileChooser.setInitialFileName("log_report.txt");
+
+        File initialDirectory = new File("src/main/log");
+        if (!initialDirectory.exists()) {
+            initialDirectory.mkdirs();
+        }
+        fileChooser.setInitialDirectory(initialDirectory);
+
+        File file = fileChooser.showSaveDialog(stackMain.getScene().getWindow());
+        if (file != null) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                writer.write(logBuilder.toString());
+                log("Отчет журнала сохранен в: " + file.getAbsolutePath());
+                setStatusMessage("Отчет журнала сохранен");
+            } catch (IOException e) {
+                log("Ошибка сохранения отчета журнала: " + e.getMessage());
+                setStatusMessage("Ошибка сохранения отчета журнала");
+            }
+        } else {
+            log("Сохранение отчета журнала отменено");
+            setStatusMessage("Сохранение отчета журнала отменено");
         }
     }
 
-    public Path getRootDirectory() {
-        return Paths.get(rootDirectory.getPath());
+    public void updateTrashLabel() {
+        Path trashPath = Paths.get("src/main/trash");
+        try (Stream<Path> files = Files.walk(trashPath)) {
+            long fileCount = files.filter(Files::isRegularFile).count();
+            trashLabel.setText(fileCount + " файл" + getCorrectRussianEnding(fileCount));
+            trashLabel.setStyle("-fx-text-fill: #83888B");
+        } catch (IOException e) {
+            e.printStackTrace();
+            trashLabel.setText("Ошибка чтения файлов");
+        }
     }
 
-    public TreeView<String> getFileTreeTable() {
-        return (TreeView<String>) fileBrowserTreeView;
+    public String getCorrectRussianEnding(long count) {
+        if (count % 10 == 1 && count % 100 != 11) {
+            return "";
+        } else if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) {
+            return "а";
+        } else {
+            return "ов";
+        }
+    }
+
+    /**
+     * Обрабатывает процесс установки.
+     * Запрашивает у пользователя директорию для установки, клонирует репозиторий,
+     * создает необходимые директории и устанавливает компоненты.
+     */
+    private void handleInstallation() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Выберите директорию для установки");
+        File selectedDirectory = directoryChooser.showDialog(new Stage());
+        if (selectedDirectory != null) {
+            try {
+                setupDirectories(selectedDirectory.toPath());
+                cloneGitHubRepo(selectedDirectory.toPath());
+                installComponents(selectedDirectory.toPath());
+                Files.createFile(Paths.get(selectedDirectory.toPath().toString(), INSTALL_FLAG));
+                setStatusMessage("Установка завершена. Перезапустите приложение.");
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                setStatusMessage("Ошибка установки: " + e.getMessage());
+            }
+        } else {
+            setStatusMessage("Директория не выбрана.");
+        }
+    }
+
+    /**
+     * Создает необходимые директории для установки.
+     *
+     * @param installPath Путь к директории установки.
+     * @throws IOException Если происходит ошибка ввода-вывода.
+     */
+    private void setupDirectories(Path installPath) throws IOException {
+        Files.createDirectories(installPath.resolve(HOME_DIR));
+        Files.createDirectories(installPath.resolve(TRASH_DIR));
+        Files.createDirectories(installPath.resolve(FONTS_DIR));
+        Files.createDirectories(installPath.resolve(JAVA_FX_LIB));
+        Files.createDirectories(installPath.resolve(TEMP_DIR));
+    }
+
+    /**
+     * Клонирует репозиторий с GitHub в указанную временную директорию.
+     *
+     * @param installPath Путь к директории установки.
+     * @throws IOException          Если происходит ошибка ввода-вывода.
+     * @throws InterruptedException Если происходит ошибка прерывания.
+     */
+    private void cloneGitHubRepo(Path installPath) throws IOException, InterruptedException {
+        ProcessBuilder builder = new ProcessBuilder();
+        builder.command("git", "clone", GITHUB_REPO_URL, installPath.resolve(TEMP_DIR).toString());
+        builder.directory(new File(System.getProperty("user.home")));
+        Process process = builder.start();
+        process.waitFor();
+    }
+
+    /**
+     * Устанавливает компоненты приложения из временной директории в нужные места.
+     *
+     * @param installPath Путь к директории установки.
+     * @throws IOException Если происходит ошибка ввода-вывода.
+     */
+    private void installComponents(Path installPath) throws IOException {
+        // Перемещаем файлы из временной директории в нужные места
+        Files.move(installPath.resolve(TEMP_DIR).resolve("path/to/javafx"), installPath.resolve(JAVA_FX_LIB));
+        Files.move(installPath.resolve(TEMP_DIR).resolve("path/to/fonts"), installPath.resolve(FONTS_DIR));
+        // Удаляем временную директорию
+        deleteDirectory(installPath.resolve(TEMP_DIR).toFile());
+
+        // Добавляем приложение в меню
+        createDesktopEntry(installPath);
+    }
+
+    /**
+     * Удаляет указанную директорию рекурсивно.
+     *
+     * @param directoryToBeDeleted Директория для удаления.
+     */
+    private void deleteDirectory(File directoryToBeDeleted) {
+        File[] allContents = directoryToBeDeleted.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteDirectory(file);
+            }
+        }
+        directoryToBeDeleted.delete();
+    }
+
+    /**
+     * Создает запись для запуска приложения в меню приложений.
+     *
+     * @param installPath Путь к директории установки.
+     * @throws IOException Если происходит ошибка ввода-вывода.
+     */
+    private void createDesktopEntry(Path installPath) throws IOException {
+        String desktopEntry = "[Desktop Entry]\n" +
+                "Version=1.0\n" +
+                "Name=SuperApp\n" +
+                "Exec=java -jar " + installPath.resolve("build/libs/SuperApp.jar").toString() + "\n" +
+                "Icon=" + installPath.resolve("icon.png").toString() + "\n" +
+                "Type=Application\n" +
+                "Categories=Utility;\n";
+
+        Path desktopEntryPath = Paths.get(System.getProperty("user.home"), ".local/share/applications/SuperApp.desktop");
+        Files.write(desktopEntryPath, desktopEntry.getBytes());
+    }
+
+    /**
+     * Устанавливает сообщение статуса в интерфейсе.
+     *
+     * @param message Сообщение для установки.
+     */
+    public void setStatusMessage(String message) {
+        if (statusLabel != null) {
+            statusLabel.setText(message);
+        } else {
+            System.err.println("statusLabel is not initialized");
+        }
     }
 }
