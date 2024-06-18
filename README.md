@@ -36,9 +36,8 @@ sudo apt install -y openjdk-21-jdk git maven unzip
    ```bash
    cd ~
    git clone https://github.com/dmtrycreator/SuperApp.git
-   cd SuperApp
-   chmod +x install.sh
-   ./install.sh
+   chmod +x SuperApp/install.sh
+   ./SuperApp/install.sh
    ```
 
 2. **Удаление приложения**
