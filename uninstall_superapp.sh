@@ -20,17 +20,17 @@ else
     echo "Значок приложения в меню не найден: $DESKTOP_ENTRY"
 fi
 
-# Удаление jar-файла приложения
-JAR_PATH="/opt/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar"
+# Удаление JAR-файла приложения
+JAR_PATH="$HOME/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar"
 if [ -f "$JAR_PATH" ]; then
-    sudo rm "$JAR_PATH"
+    rm "$JAR_PATH"
     echo "JAR-файл приложения удален: $JAR_PATH"
 else
     echo "JAR-файл приложения не найден: $JAR_PATH"
 fi
 
 # Удаление папки с исходным кодом приложения
-SOURCE_DIR="/opt/SuperApp"
+SOURCE_DIR="/opt/javafx"
 if [ -d "$SOURCE_DIR" ]; then
     sudo rm -rf "$SOURCE_DIR"
     echo "Папка с исходным кодом удалена: $SOURCE_DIR"
