@@ -41,7 +41,7 @@ public class SuperApp extends Application {
     }
 
     private void showInstallationWindow(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(SuperApp.class.getResource("/superapp/kr_superapp/install.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(SuperApp.class.getResource("install.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
 
         InstallController controller = fxmlLoader.getController();
@@ -53,10 +53,10 @@ public class SuperApp extends Application {
     }
 
     private void showMainWindow(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(SuperApp.class.getResource("/superapp/kr_superapp/main.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(SuperApp.class.getResource("main.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
 
-        String css = this.getClass().getResource("/superapp/kr_superapp/style.css").toExternalForm();
+        String css = this.getClass().getResource("style.css").toExternalForm();
         if (css != null) {
             scene.getStylesheets().add(css);
         } else {
