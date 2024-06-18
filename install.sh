@@ -11,6 +11,8 @@ fi
 # Клонирование репозитория
 git clone https://github.com/dmtrycreator/SuperApp.git "$HOME/SuperApp"
 
+mkdir -p "$HOME/SuperApp/src/main"
+
 # Переход в директорию проекта
 cd "$HOME/SuperApp" || exit
 
