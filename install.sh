@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Убедитесь, что скрипт выполняется из домашнего каталога
+if [ "$PWD" != "$HOME" ]; then
+    echo "Ошибка: пожалуйста, выполните скрипт из вашего домашнего каталога."
+    exit 1
+fi
+
 # Установка необходимых пакетов
 sudo apt update
 sudo apt install -y openjdk-21-jdk git maven unzip
@@ -10,7 +16,10 @@ if [ -d "$HOME/SuperApp" ]; then
 fi
 
 # Клонирование репозитория
-git clone https://github.com/dmtrycreator/SuperApp.git "$HOME/SuperApp"
+if ! git clone https://github.com/dmtrycreator/SuperApp.git "$HOME/SuperApp"; then
+    echo "Ошибка: не удалось клонировать репозиторий в $HOME/SuperApp"
+    exit 1
+fi
 
 # Проверка успешного клонирования
 if [ ! -d "$HOME/SuperApp" ]; then
