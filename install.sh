@@ -11,11 +11,6 @@ fi
 # Клонирование репозитория
 git clone https://github.com/dmtrycreator/SuperApp.git "$HOME/SuperApp"
 
-# Перемещение необходимых директорий
-mkdir -p "$HOME/SuperApp/src/main"
-mv "$HOME/SuperApp/home" "$HOME/SuperApp/src/main/home"
-mv "$HOME/SuperApp/trash" "$HOME/SuperApp/src/main/trash"
-
 # Переход в директорию проекта
 cd "$HOME/SuperApp" || exit
 
@@ -24,8 +19,8 @@ mvn clean package
 
 # Установка шрифтов
 mkdir -p ~/.fonts
-if [ -d "$HOME/SuperApp/src/main/resources/fonts" ]; then
-    cp -r "$HOME/SuperApp/src/main/resources/fonts/*" ~/.fonts
+if [ -d "$HOME/SuperApp/lib/fonts/Inter" ]; then
+    cp -r "$HOME/SuperApp/lib/fonts/Inter/*" ~/.fonts
 else
     echo "Каталог шрифтов не существует. Пропускаем копирование шрифтов."
 fi
