@@ -13,7 +13,7 @@ fi
 git clone https://github.com/dmtrycreator/SuperApp.git "$HOME/SuperApp"
 
 # Переход в директорию проекта
-cd "$HOME/SuperApp" || exit
+cd "$HOME/SuperApp" || { echo "Не удалось перейти в директорию $HOME/SuperApp"; exit 1; }
 
 # Компиляция проекта с помощью Maven
 mvn clean package
@@ -28,7 +28,7 @@ fi
 
 # Установка JavaFX
 sudo mkdir -p /opt/javafx
-cd /opt/javafx || exit
+cd /opt/javafx || { echo "Не удалось перейти в директорию /opt/javafx"; exit 1; }
 sudo curl -L -o openjfx.zip https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_linux-x64_bin-sdk.zip
 sudo unzip -o openjfx.zip
 sudo cp -r javafx-sdk-22.0.1/lib/* ./lib
