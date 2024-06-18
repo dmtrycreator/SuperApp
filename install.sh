@@ -46,7 +46,7 @@ sudo mkdir -p /opt/javafx
 cd /opt/javafx || { echo "Не удалось перейти в директорию /opt/javafx"; exit 1; }
 sudo curl -L -o openjfx.zip https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_linux-x64_bin-sdk.zip
 sudo unzip -o openjfx.zip
-sudo cp -r javafx-sdk-22.0.1/lib/* ./lib
+sudo cp -r javafx-sdk-22.0.1/lib /opt/javafx
 sudo rm -rf javafx-sdk-22.0.1 openjfx.zip
 
 # Копирование исполняемых файлов
@@ -64,7 +64,7 @@ mkdir -p "$HOME/SuperApp/src/main/trash"
 DESKTOP_ENTRY="[Desktop Entry]
 Version=1.0
 Name=SuperApp
-Exec=java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar $HOME/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar
+Exec=java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar $HOME/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT-shaded.jar
 Icon=$HOME/SuperApp/src/main/resources/superapp/kr_superapp/icons/Icon_SuperApp.png
 Type=Application
 Categories=Utility;"
@@ -72,4 +72,4 @@ Categories=Utility;"
 echo "$DESKTOP_ENTRY" > ~/.local/share/applications/SuperApp.desktop
 
 # Уведомление об успешной установке
-echo "Вы можете запустить приложение из меню или командой: java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar $HOME/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar"
+echo "Вы можете запустить приложение из меню или командой: java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar $HOME/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT-shaded.jar"
