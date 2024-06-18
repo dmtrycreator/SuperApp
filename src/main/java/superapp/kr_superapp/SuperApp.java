@@ -24,16 +24,20 @@ public class SuperApp extends Application {
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/superapp/kr_superapp/icons/Icon_SuperApp.png")));
 
         // Создание необходимых директорий, если они не существуют
-        Files.createDirectories(Paths.get(HOME_DIR));
-        Files.createDirectories(Paths.get(TRASH_DIR));
-        Files.createDirectories(Paths.get(FONTS_DIR));
-        Files.createDirectories(Paths.get(JAVA_FX_LIB));
+        createDirectories();
 
         if (!isInstalled()) {
             showInstallationWindow(stage);
         } else {
             showMainWindow(stage);
         }
+    }
+
+    private void createDirectories() throws IOException {
+        Files.createDirectories(Paths.get(HOME_DIR));
+        Files.createDirectories(Paths.get(TRASH_DIR));
+        Files.createDirectories(Paths.get(FONTS_DIR));
+        Files.createDirectories(Paths.get(JAVA_FX_LIB));
     }
 
     private boolean isInstalled() {
