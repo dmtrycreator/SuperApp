@@ -12,6 +12,12 @@ fi
 # Клонирование репозитория
 git clone https://github.com/dmtrycreator/SuperApp.git "$HOME/SuperApp"
 
+# Проверка успешного клонирования
+if [ ! -d "$HOME/SuperApp" ]; then
+    echo "Ошибка: не удалось клонировать репозиторий в $HOME/SuperApp"
+    exit 1
+fi
+
 # Переход в директорию проекта
 cd "$HOME/SuperApp" || { echo "Не удалось перейти в директорию $HOME/SuperApp"; exit 1; }
 
