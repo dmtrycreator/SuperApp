@@ -75,7 +75,7 @@
                   </HBox>
                </children>
             </VBox>
-              <Label fx:id="statusLabel" text="Чтобы продолжить, установите" textFill="#469ee9">
+              <Label fx:id="statusLabel" text="Чтобы продолжить, установите" textFill="#83888B">
                <font>
                   <Font name="Inter Medium" size="14.0" />
                </font>
