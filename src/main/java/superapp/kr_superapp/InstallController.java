@@ -54,7 +54,7 @@ public class InstallController {
             // Создание файла флага установки
             Files.createFile(installPath.resolve(INSTALL_FLAG));
 
-            statusLabel.setText("Установка завершена успешно!");
+            statusLabel.setText("Установка завершена успешно! Перейзадите в приложение.");
             statusLabel.setStyle("-fx-text-fill: #2CB67D;");
         } catch (IOException e) {
             e.printStackTrace();
