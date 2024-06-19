@@ -64,7 +64,7 @@ mkdir -p "$HOME/SuperApp/src/main/trash"
 DESKTOP_ENTRY="[Desktop Entry]
 Version=1.0
 Name=SuperApp
-Exec=java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar $HOME/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar
+Exec= cd SuperApp && java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar /home/dmtrycreator/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar
 Icon=$HOME/SuperApp/src/main/resources/superapp/kr_superapp/icons/Icon_SuperApp.png
 Type=Application
 Categories=Utility;"
@@ -72,4 +72,4 @@ Categories=Utility;"
 echo "$DESKTOP_ENTRY" > ~/.local/share/applications/SuperApp.desktop
 
 # Уведомление об успешной установке
-echo "Вы можете запустить приложение из меню или командой: java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar $HOME/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar"
+echo "Вы можете запустить приложение из меню. После успешной установки перезайдите."
