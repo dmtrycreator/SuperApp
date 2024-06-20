@@ -9,7 +9,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Утилитарный класс для настройки функциональности Drag-and-Drop.
@@ -69,6 +68,7 @@ public class DragAndDropUtil {
                     SystemInfo.log("File dropped: " + sourcePath.toString() + " / Файл сброшен: " + sourcePath.toString());
                 }
                 success = true;
+                Controller.getInstance().updateTrashLabel(); 
             }
             event.setDropCompleted(success);
             SystemInfo.log("Drag drop completed with success: " + success + " / Перетаскивание завершено с успехом: " + success);
