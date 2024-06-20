@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
 
 /**
  * Класс FileTreeTable управляет представлением дерева файлов и папок в приложении.
- * Он предоставляет методы для настройки и обновления элементов дерева, а также для обработки операций перетаскивания.
+ * Он предоставляет методы для настройки и обновления элементов дерева.
  *
  * The FileTreeTable class manages the tree view representation of files and folders in the application.
- * It provides methods for setting up and updating tree items, as well as handling drag-and-drop operations.
+ * It provides methods for setting up and updating tree items.
  *
  * <p>Автор: Дмитрий Задисенцев</p>
  * <p>Version: 1.0</p>
@@ -33,7 +33,7 @@ public class FileTreeTable {
     private static final Image fileImage = new Image(FileTreeTable.class.getResourceAsStream("icons/File.png"));
     private static final Image storageImage = new Image(FileTreeTable.class.getResourceAsStream("icons/Storage.png"));
     private static final File rootDirectory = new File("src/main/home");
-    private static final Path mediaDirectory = Paths.get("/media/dmtrycreator");
+    private static final Path mediaDirectory = Paths.get("/media", System.getProperty("user.name"));
 
     /**
      * Конструктор FileTreeTable инициализирует дерево файлов с заданным представлением TreeTableView.
@@ -45,7 +45,6 @@ public class FileTreeTable {
     public FileTreeTable(TreeTableView<FileItem> treeTableView) {
         this.treeTableView = treeTableView;
         setupColumns();
-        enableDragAndDrop();
         updateTreeItems(rootDirectory.getPath());
     }
 
@@ -224,74 +223,6 @@ public class FileTreeTable {
             }
         }
         return node;
-    }
-
-    /**
-     * Включает поддержку drag and drop для дерева файлов.
-     *
-     * Enables drag and drop support for the file tree.
-     */
-    private void enableDragAndDrop() {
-        treeTableView.setOnDragDetected(event -> {
-            TreeItem<FileItem> selectedItem = treeTableView.getSelectionModel().getSelectedItem();
-            if (selectedItem != null) {
-                Dragboard db = treeTableView.startDragAndDrop(TransferMode.ANY);
-                ClipboardContent content = new ClipboardContent();
-                List<File> selectedFiles = treeTableView.getSelectionModel().getSelectedItems().stream()
-                        .map(item -> new File(item.getValue().getAbsolutePath()))
-                        .collect(Collectors.toList());
-                content.putFiles(selectedFiles);
-                db.setContent(content);
-                event.consume();
-            }
-        });
-
-        treeTableView.setOnDragOver(event -> {
-            if (event.getGestureSource() != treeTableView && event.getDragboard().hasFiles()) {
-                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-            }
-            event.consume();
-        });
-
-        treeTableView.setOnDragDropped(event -> {
-            Dragboard db = event.getDragboard();
-            boolean success = false;
-            if (db.hasFiles()) {
-                List<File> files = db.getFiles();
-                TreeItem<FileItem> targetItem = treeTableView.getSelectionModel().getSelectedItem();
-                if (targetItem != null) {
-                    Path targetPath = Paths.get(targetItem.getValue().getAbsolutePath());
-                    for (File file : files) {
-                        Path sourcePath = file.toPath();
-                        Path destinationPath = targetPath.resolve(file.getName());
-                        try {
-                            Files.move(sourcePath, destinationPath);
-                            updateTreeItems(targetPath.toString());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    success = true;
-                }
-            }
-            event.setDropCompleted(success);
-            event.consume();
-        });
-
-        treeTableView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                TreeItem<FileItem> selectedItem = treeTableView.getSelectionModel().getSelectedItem();
-                if (selectedItem != null) {
-                    String originalPath = selectedItem.getValue().getAbsolutePath();
-                    String rootDirPath = Controller.getInstance().getRootDirectory().getAbsolutePath();
-                    String correctedPath = originalPath.replace(rootDirPath, "home");
-                    if (Files.isDirectory(Paths.get(originalPath))) {
-                        Controller.getInstance().handleDirectoryChange("src/main/" + correctedPath);
-                        log("Директория открыта: " + originalPath);
-                    }
-                }
-            }
-        });
     }
 
     /**
