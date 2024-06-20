@@ -618,7 +618,7 @@ private static final String TEMP_DIR = "src/main/temp";
 public void updateTrashLabel() {
         Path trashPath = Paths.get("src/main/trash");
         try (Stream<Path> elements = Files.walk(trashPath)) {
-            long elementCount = elements.count();
+            long elementCount = elements.filter(Files::isRegularFile).count();
             trashLabel.setText(elementCount + " элемент" + getCorrectRussianEnding(elementCount));
             trashLabel.setStyle("-fx-text-fill: #83888B");
         } catch (IOException e) {
