@@ -11,13 +11,14 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-
-import java.io.File;
+import javafx.scene.shape.Rectangle;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,6 +34,7 @@ import java.util.stream.Stream;
  */
 public class TrashHandler {
     public static final String TRASH_DIRECTORY = "src/main/trash";
+    private static final Map<Path, Path> originalPaths = new HashMap<>();
 
     private ScrollPane scrollPane;
     private StackPane stackMain;
@@ -107,15 +109,18 @@ public class TrashHandler {
 
     public static void moveToTrash(Path source) throws Exception {
         Path target = Paths.get(TRASH_DIRECTORY).resolve(source.getFileName());
+        originalPaths.put(target, source);
         Files.move(source, target);
         log("File moved to trash: " + source.toString() + " / Файл перемещен в корзину: " + source.toString());
     }
 
     public static void restoreFromTrash(Path path) throws IOException {
-        Path target = Paths.get("src/main/home").resolve(path.getFileName());
-        Files.move(path, target);
-        Controller.getInstance().updateTrashLabel();
-        log("File restored from trash: " + path.toString() + " / Файл восстановлен из корзины: " + path.toString());
+        Path target = originalPaths.remove(path);
+        if (target != null) {
+            Files.move(path, target);
+            Controller.getInstance().updateTrashLabel();
+            log("File restored from trash: " + path.toString() + " / Файл восстановлен из корзины: " + path.toString());
+        }
     }
 
     public static void deleteForever(Path path) throws IOException {
@@ -195,16 +200,59 @@ public class TrashHandler {
         });
 
         deleteForeverItem.setOnAction(event -> {
+            showDeleteConfirmationOverlay(path);
+        });
+
+        return vbox;
+    }
+
+    private void showDeleteConfirmationOverlay(Path path) {
+        HBox deleteOverlay = new HBox();
+        deleteOverlay.setAlignment(Pos.CENTER);
+        deleteOverlay.setMaxHeight(138);
+        deleteOverlay.setMaxWidth(538);
+        deleteOverlay.setSpacing(10);
+        deleteOverlay.setStyle("-fx-background-color: #1E1E1E; -fx-background-radius: 18; -fx-padding: 30 40 30 40;");
+
+        Label confirmationLabel = new Label("Вы действительно хотите удалить файл навсегда?");
+        confirmationLabel.setTextFill(Color.web("#F5FAFF"));
+        confirmationLabel.setFont(new Font("Inter Medium", 14));
+
+        Button deleteButton = new Button("Удалить");
+        deleteButton.setPrefHeight(46);
+        deleteButton.setPrefWidth(107);
+        deleteButton.setStyle("-fx-background-color: #E94545; -fx-text-fill: #F5FAFF; -fx-font-size: 14; -fx-background-radius: 12;");
+
+        Button cancelButton = new Button("Отмена");
+        cancelButton.setPrefHeight(46);
+        cancelButton.setPrefWidth(107);
+        cancelButton.setStyle("-fx-background-color: #469EE9; -fx-text-fill: #F5FAFF; -fx-font-size: 14; -fx-background-radius: 12;");
+
+        Rectangle background = new Rectangle(
+                stackMain.getScene().getWidth(),
+                stackMain.getScene().getHeight(),
+                Color.rgb(0, 0, 0, 0.7)
+        );
+
+        deleteButton.setOnAction(event -> {
             try {
                 deleteForever(path);
                 updateTrashView();
+                stackMain.getChildren().removeAll(background, deleteOverlay);
             } catch (IOException e) {
                 e.printStackTrace();
                 log("Error deleting file permanently: " + path.toString() + " / Ошибка удаления файла: " + path.toString());
             }
         });
 
-        return vbox;
+        cancelButton.setOnAction(event -> {
+            stackMain.getChildren().removeAll(background, deleteOverlay);
+        });
+
+        deleteOverlay.getChildren().addAll(confirmationLabel, deleteButton, cancelButton);
+        stackMain.getChildren().addAll(background, deleteOverlay);
+
+        background.setOnMouseClicked(event -> stackMain.getChildren().removeAll(background, deleteOverlay));
     }
 
     /**
