@@ -60,11 +60,18 @@ done
 mkdir -p "$HOME/SuperApp/src/main/home"
 mkdir -p "$HOME/SuperApp/src/main/trash"
 
+# Создание скрипта запуска
+LAUNCHER_SCRIPT="$HOME/SuperApp/start_superapp.sh"
+echo "#!/bin/bash
+cd \"$HOME/SuperApp\"
+exec java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar \"$HOME/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar\"" > "$LAUNCHER_SCRIPT"
+chmod +x "$LAUNCHER_SCRIPT"
+
 # Добавление приложения в меню
 DESKTOP_ENTRY="[Desktop Entry]
 Version=1.0
 Name=SuperApp
-Exec= cd SuperApp && java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar /home/dmtrycreator/SuperApp/target/KR_SuperApp-1.0-SNAPSHOT.jar
+Exec=$LAUNCHER_SCRIPT
 Icon=$HOME/SuperApp/src/main/resources/superapp/kr_superapp/icons/Icon_SuperApp.png
 Type=Application
 Categories=Utility;"
