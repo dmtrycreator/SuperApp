@@ -210,8 +210,8 @@ public class TrashHandler {
         HBox deleteOverlay = new HBox();
         deleteOverlay.setAlignment(Pos.CENTER);
         deleteOverlay.setMaxHeight(138);
-       // deleteOverlay.setMaxWidth(538);
-        deleteOverlay.setSpacing(10);
+         deleteOverlay.setMaxWidth(740);
+        deleteOverlay.setSpacing(28);
         deleteOverlay.setStyle("-fx-background-color: #1E1E1E; -fx-background-radius: 18; -fx-padding: 30 40 30 40;");
 
         Label confirmationLabel = new Label("Вы действительно хотите удалить файл навсегда?");
