@@ -210,7 +210,7 @@ public class TrashHandler {
         HBox deleteOverlay = new HBox();
         deleteOverlay.setAlignment(Pos.CENTER);
         deleteOverlay.setMaxHeight(138);
-        deleteOverlay.setMaxWidth(538);
+       // deleteOverlay.setMaxWidth(538);
         deleteOverlay.setSpacing(10);
         deleteOverlay.setStyle("-fx-background-color: #1E1E1E; -fx-background-radius: 18; -fx-padding: 30 40 30 40;");
 
@@ -221,7 +221,7 @@ public class TrashHandler {
         Button deleteButton = new Button("Удалить");
         deleteButton.setPrefHeight(46);
         deleteButton.setPrefWidth(107);
-        deleteButton.setStyle("-fx-background-color: #E94545; -fx-text-fill: #F5FAFF; -fx-font-size: 14; -fx-background-radius: 12;");
+        deleteButton.setStyle("-fx-background-color: #E94646; -fx-text-fill: #F5FAFF; -fx-font-size: 14; -fx-background-radius: 12;");
 
         Button cancelButton = new Button("Отмена");
         cancelButton.setPrefHeight(46);
