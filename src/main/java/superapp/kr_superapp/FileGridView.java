@@ -232,7 +232,7 @@ public class FileGridView {
                 TrashHandler.moveToTrash(path);
                 updateGridView(path.getParent().toString());
                 Controller.getInstance().getFileTreeTable().updateTreeItems(Controller.getInstance().getRootDirectory().getPath());
-                Controller.getInstance().updateTrashLabel(); // Добавляем вызов здесь
+                Controller.getInstance().updateTrashLabel();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -247,7 +247,7 @@ public class FileGridView {
                 Files.move(sourcePath, targetPath);
                 updateGridView(currentDirectory);
                 Controller.getInstance().getFileTreeTable().updateTreeItems(Controller.getInstance().getRootDirectory().getPath());
-                Controller.getInstance().updateTrashLabel(); // Добавляем вызов здесь
+                Controller.getInstance().updateTrashLabel();
             } catch (IOException e) {
                 e.printStackTrace();
             }
