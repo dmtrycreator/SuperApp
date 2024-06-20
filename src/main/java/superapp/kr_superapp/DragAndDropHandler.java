@@ -82,6 +82,7 @@ public class DragAndDropHandler {
                             Files.move(sourcePath, destinationPath);
                             fileTreeTable.updateTreeItems(targetPath.toString());
                             SystemInfo.log("File moved: " + sourcePath + " to " + destinationPath + " / Файл перемещен: " + sourcePath + " в " + destinationPath);
+                            Controller.getInstance().updateTrashLabel(); // Добавляем вызов здесь
                         } catch (IOException e) {
                             e.printStackTrace();
                             SystemInfo.log("Error moving file: " + e.getMessage() + " / Ошибка перемещения файла: " + e.getMessage());
@@ -115,14 +116,11 @@ public class DragAndDropHandler {
             }
         });
 
-
-
         trashPane.setOnDragOver(event -> {
             if (event.getGestureSource() != trashPane && event.getDragboard().hasFiles()) {
                 event.acceptTransferModes(TransferMode.MOVE);
                 SystemInfo.log("Trash drag over detected / Обнаружено перетаскивание на корзину");
             }
-            Controller.getInstance().updateTrashLabel();
             event.consume();
         });
 
@@ -135,6 +133,7 @@ public class DragAndDropHandler {
                     try {
                         TrashHandler.moveToTrash(file.toPath());
                         SystemInfo.log("File deleted: " + file.getAbsolutePath() + " / Файл удален: " + file.getAbsolutePath());
+                        Controller.getInstance().updateTrashLabel(); // Добавляем вызов здесь
                     } catch (IOException e) {
                         e.printStackTrace();
                         SystemInfo.log("Error deleting file: " + e.getMessage() + " / Ошибка удаления файла: " + e.getMessage());
@@ -145,10 +144,8 @@ public class DragAndDropHandler {
                 success = true;
             }
             event.setDropCompleted(success);
-            Controller.getInstance().updateTrashLabel();
             SystemInfo.log("Trash drag drop completed with success: " + success + " / Перетаскивание на корзину завершено с успехом: " + success);
             event.consume();
-
         });
     }
 }
