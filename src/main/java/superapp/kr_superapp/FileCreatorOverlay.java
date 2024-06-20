@@ -121,6 +121,7 @@ public class FileCreatorOverlay {
                 Files.write(newPath, data, StandardOpenOption.WRITE);
             }
             fileGridView.updateGridView(fileGridView.getCurrentDirectory());
+            Controller.getInstance().getFileTreeTable().updateTreeItems(Controller.getInstance().getRootDirectory().getPath());
         } catch (AccessDeniedException e) {
             showError("Отказано в доступе: " + e.getFile());
             e.printStackTrace();
