@@ -28,11 +28,11 @@ import java.util.stream.Stream;
  * Класс для отображения и управления файлами и папками в виде сетки.
  * Включает в себя функционал для обновления представления, создания элементов файлов, обработки кликов,
  * управления выделением, а также поддержки операций drag and drop и копирования/вставки.
-
+ *
  * Class for displaying and managing files and folders in a grid view.
  * Includes functionality for updating the view, creating file items, handling clicks,
  * managing selection, and supporting drag and drop and copy/paste operations.
-
+ *
  * <p>Автор: Дмитрий Задисенцев</p>
  * <p>Version: 1.0</p>
  */
@@ -95,7 +95,7 @@ public class FileGridView {
                 gridPane.getColumnConstraints().add(columnConstraints);
             }
             int index = 0;
-            for ( int row = 0; row < rowCount; row++) {
+            for (int row = 0; row < rowCount; row++) {
                 for (int column = 0; column < columnCount; column++) {
                     if (index < fileCount) {
                         Path path = fileList.get(index);
@@ -120,7 +120,6 @@ public class FileGridView {
      * @param path Путь к файлу или папке / Path to the file or folder
      * @param vbox Контейнер элемента / VBox container of the item
      */
-
     private void handleFileItemClick(MouseEvent event, Path path, VBox vbox) {
         if (event.getButton() == MouseButton.PRIMARY) {
             if (event.isControlDown()) {
@@ -140,7 +139,6 @@ public class FileGridView {
             }
         }
     }
-
 
     /**
      * Создает элемент файла для отображения в сетке.
@@ -234,6 +232,7 @@ public class FileGridView {
                 TrashHandler.moveToTrash(path);
                 updateGridView(path.getParent().toString());
                 Controller.getInstance().getFileTreeTable().updateTreeItems(Controller.getInstance().getRootDirectory().getPath());
+                Controller.getInstance().updateTrashLabel(); // Добавляем вызов здесь
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -248,6 +247,7 @@ public class FileGridView {
                 Files.move(sourcePath, targetPath);
                 updateGridView(currentDirectory);
                 Controller.getInstance().getFileTreeTable().updateTreeItems(Controller.getInstance().getRootDirectory().getPath());
+                Controller.getInstance().updateTrashLabel(); // Добавляем вызов здесь
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -276,7 +276,6 @@ public class FileGridView {
         stage.setScene(new Scene(root));
         stage.show();
     }
-
 
     /**
      * Переключает состояние выделения элемента.
@@ -354,6 +353,7 @@ public class FileGridView {
                         Files.move(sourcePath, targetPath);
                         updateGridView(currentDirectory);
                         Controller.getInstance().getFileTreeTable().updateTreeItems(Controller.getInstance().getRootDirectory().getPath());
+                        Controller.getInstance().updateTrashLabel(); // Добавляем вызов здесь
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -422,6 +422,7 @@ public class FileGridView {
                 }
                 updateGridView(currentDirectory);
                 Controller.getInstance().getFileTreeTable().updateTreeItems(Controller.getInstance().getRootDirectory().getPath());
+                Controller.getInstance().updateTrashLabel(); // Добавляем вызов здесь
                 clipboardFile = null;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -497,6 +498,7 @@ public class FileGridView {
                 try {
                     Files.move(path, path.resolveSibling(newName));
                     updateGridView(currentDirectory);
+                    Controller.getInstance().updateTrashLabel(); // Добавляем вызов здесь
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
