@@ -115,6 +115,7 @@ public class FileItemHandler {
                 TrashHandler.moveToTrash(path);
                 gridViewManager.updateGridView(path.getParent().toString());
                 gridViewManager.updateTreeItems(GridViewManager.getRootDirectory().getPath());
+                Controller.getInstance().updateTrashLabel(); 
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -129,6 +130,7 @@ public class FileItemHandler {
                 Files.move(sourcePath, targetPath);
                 gridViewManager.updateGridView(gridViewManager.getCurrentDirectory());
                 gridViewManager.updateTreeItems(GridViewManager.getRootDirectory().getPath());
+                Controller.getInstance().updateTrashLabel(); 
             } catch (IOException e) {
                 e.printStackTrace();
             }
