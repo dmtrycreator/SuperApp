@@ -17,14 +17,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.scene.Parent;
 
 /**
  * Класс TrashHandler отвечает за управление содержимым корзины,
@@ -116,6 +111,13 @@ public class TrashHandler {
         log("File moved to trash: " + source.toString() + " / Файл перемещен в корзину: " + source.toString());
     }
 
+    public static void restoreFromTrash(Path path) throws IOException {
+        Path target = Paths.get("src/main/home").resolve(path.getFileName());
+        Files.move(path, target);
+        Controller.getInstance().updateTrashLabel();
+        log("File restored from trash: " + path.toString() + " / Файл восстановлен из корзины: " + path.toString());
+    }
+
     public static void deleteForever(Path path) throws IOException {
         if (Files.isDirectory(path)) {
             try (Stream<Path> entries = Files.list(path)) {
@@ -163,13 +165,13 @@ public class TrashHandler {
         });
 
         ContextMenu contextMenu = new ContextMenu();
-        MenuItem openItem = new MenuItem("Открыть");
+        MenuItem restoreItem = new MenuItem("Восстановить");
         MenuItem propertiesItem = new MenuItem("Свойства");
         MenuItem deleteForeverItem = new MenuItem("Удалить навсегда");
         deleteForeverItem.getStyleClass().add("menu-item-delete");
         propertiesItem.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN));
 
-        contextMenu.getItems().addAll(openItem, propertiesItem, deleteForeverItem);
+        contextMenu.getItems().addAll(restoreItem, propertiesItem, deleteForeverItem);
 
         vbox.setOnContextMenuRequested(event -> contextMenu.show(vbox, event.getScreenX(), event.getScreenY()));
 
@@ -182,9 +184,13 @@ public class TrashHandler {
             }
         });
 
-        openItem.setOnAction(event -> {
-            if (Files.isDirectory(path)) {
-                updateView(path.toString());
+        restoreItem.setOnAction(event -> {
+            try {
+                restoreFromTrash(path);
+                updateTrashView();
+            } catch (IOException e) {
+                e.printStackTrace();
+                log("Error restoring file: " + path.toString() + " / Ошибка восстановления файла: " + path.toString());
             }
         });
 
@@ -193,8 +199,6 @@ public class TrashHandler {
                 deleteForever(path);
                 updateTrashView();
             } catch (IOException e) {
-                e.printStackTrace();
-                log("Error deleting file permanently: " + path.toString() + " / Ошибка удаления файла: " + path.toString());
                 e.printStackTrace();
                 log("Error deleting file permanently: " + path.toString() + " / Ошибка удаления файла: " + path.toString());
             }
