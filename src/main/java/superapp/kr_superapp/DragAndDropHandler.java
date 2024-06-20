@@ -82,7 +82,7 @@ public class DragAndDropHandler {
                             Files.move(sourcePath, destinationPath);
                             fileTreeTable.updateTreeItems(targetPath.toString());
                             SystemInfo.log("File moved: " + sourcePath + " to " + destinationPath + " / Файл перемещен: " + sourcePath + " в " + destinationPath);
-                            Controller.getInstance().updateTrashLabel(); // Добавляем вызов здесь
+                            Controller.getInstance().updateTrashLabel();
                         } catch (IOException e) {
                             e.printStackTrace();
                             SystemInfo.log("Error moving file: " + e.getMessage() + " / Ошибка перемещения файла: " + e.getMessage());
@@ -133,7 +133,7 @@ public class DragAndDropHandler {
                     try {
                         TrashHandler.moveToTrash(file.toPath());
                         SystemInfo.log("File deleted: " + file.getAbsolutePath() + " / Файл удален: " + file.getAbsolutePath());
-                        Controller.getInstance().updateTrashLabel(); // Добавляем вызов здесь
+                        Controller.getInstance().updateTrashLabel(); 
                     } catch (IOException e) {
                         e.printStackTrace();
                         SystemInfo.log("Error deleting file: " + e.getMessage() + " / Ошибка удаления файла: " + e.getMessage());
