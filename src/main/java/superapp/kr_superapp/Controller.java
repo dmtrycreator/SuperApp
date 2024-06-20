@@ -615,11 +615,11 @@ private static final String TEMP_DIR = "src/main/temp";
         }
     }
 
-    public void updateTrashLabel() {
+public void updateTrashLabel() {
         Path trashPath = Paths.get("src/main/trash");
-        try (Stream<Path> files = Files.walk(trashPath)) {
-            long fileCount = files.filter(Files::isRegularFile).count();
-            trashLabel.setText(fileCount + " файл" + getCorrectRussianEnding(fileCount));
+        try (Stream<Path> elements = Files.walk(trashPath)) {
+            long elementCount = elements.count();
+            trashLabel.setText(elementCount + " элемент" + getCorrectRussianEnding(elementCount));
             trashLabel.setStyle("-fx-text-fill: #83888B");
         } catch (IOException e) {
             e.printStackTrace();
