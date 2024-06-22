@@ -25,14 +25,6 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
-/**
- * Этот класс управляет основным представлением приложения файлового менеджера.
- * Он инициализирует основные компоненты пользовательского интерфейса и обрабатывает взаимодействия с файловой системой,
- * включая операции с файлами, навигацию и поиск.
- *
- * <p>Автор: Дмитрий Задисенцев</p>
- * <p>Version: 1.0</p>
- */
 public class Controller {
 
     @FXML
@@ -142,22 +134,15 @@ public class Controller {
 
     private Comparator<Path> currentComparator = Comparator.comparing(path -> path.toFile().lastModified());
 
-    // Константы для директорий установки
     private static final String HOME_DIR = "src/main/home";
     private static final String TRASH_DIR = "src/main/trash";
     private static final String FONTS_DIR = "src/main/fonts";
     private static final String JAVA_FX_LIB = "src/main/javafx/lib";
     private static final String INSTALL_FLAG = "src/main/.installed";
 
-    // URL репозитория GitHub и временная директория
     private static final String GITHUB_REPO_URL = "https://github.com/dmtrycreator/SuperApp.git";
     private static final String TEMP_DIR = "src/main/temp";
 
-    /**
-     * Конструктор для создания и инициализации Controller.
-     *
-     * Constructor to create and initialize the Controller.
-     */
     private SearchHandler searchHandler;
 
     public Controller() {
@@ -165,24 +150,10 @@ public class Controller {
         linuxAppLauncher = new LinuxAppLauncher();
     }
 
-    /**
-     * Получает текущий экземпляр Controller.
-     *
-     * Gets the current instance of Controller.
-     *
-     * @return текущий экземпляр Controller / the current instance of Controller
-     */
     public static Controller getInstance() {
         return instance;
     }
 
-    /**
-     * Инициализация контроллера. Устанавливает обработчики для различных компонентов
-     * и инициализирует основные представления.
-     *
-     * Initializes the controller. Sets handlers for various components
-     * and initializes the main views.
-     */
     @FXML
     public void initialize() {
         try {
@@ -284,22 +255,10 @@ public class Controller {
         updateTrashLabel();
     }
 
-    /**
-     * Логирует сообщение с отметкой времени.
-     *
-     * Logs a message with a timestamp.
-     *
-     * @param message сообщение для логирования / message to log
-     */
     public static void log(String message) {
         logBuilder.append(LocalTime.now()).append(" - ").append(message).append("\n");
     }
 
-    /**
-     * Показывает оверлей для создания нового файла.
-     *
-     * Shows the file creator overlay.
-     */
     public void showFileCreatorOverlay() {
         new FileCreatorOverlay(fileGridView);
         log("Оверлей создателя файла показан");
@@ -317,14 +276,6 @@ public class Controller {
         }
     }
 
-
-    /**
-     * Обрабатывает изменение директории.
-     *
-     * Handles the directory change.
-     *
-     * @param directoryPath путь к новой директории / new directory path
-     */
     @FXML
     public void handleDirectoryChange(String directoryPath) {
         updateViews(directoryPath);
@@ -334,12 +285,6 @@ public class Controller {
         writeFilePathToSharedMemory(directoryPath);
     }
 
-
-    /**
-     * Показывает панель "Обо мне".
-     *
-     * Shows the "About me" pane.
-     */
     private void showAboutPane() {
         main_pane.setVisible(false);
         status_bar.setVisible(false);
@@ -351,11 +296,6 @@ public class Controller {
         setStatusMessage("Просмотр информации обо мне");
     }
 
-    /**
-     * Показывает панель "Помощь".
-     *
-     * Shows the "Help" pane.
-     */
     private void showHelpPane() {
         main_pane.setVisible(false);
         status_bar.setVisible(false);
@@ -367,11 +307,6 @@ public class Controller {
         setStatusMessage("Просмотр помощи");
     }
 
-    /**
-     * Показывает основную панель.
-     *
-     * Shows the main pane.
-     */
     private void showMainPane() {
         main_vbox.getChildren().removeIf(node -> node instanceof Pane && node != menu_pane);
 
@@ -387,11 +322,6 @@ public class Controller {
         setStatusMessage("Возврат к основному окну");
     }
 
-    /**
-     * Показывает оверлей поиска.
-     *
-     * Shows the search overlay.
-     */
     public void showSearchOverlay() {
         HBox searchOverlay = new HBox();
         searchOverlay.setAlignment(Pos.CENTER);
@@ -433,13 +363,6 @@ public class Controller {
         setStatusMessage("Поиск запущен");
     }
 
-    /**
-     * Обновляет содержимое панели с текущей директорией.
-     *
-     * Updates the content of the directory panel.
-     *
-     * @param directoryPath путь к текущей директории / path to the current directory
-     */
     public void updateDirectoryHBox(String directoryPath) {
         directory.getChildren().clear();
 
@@ -516,39 +439,18 @@ public class Controller {
         setStatusMessage("Текущая директория: " + directoryPath);
     }
 
-    /**
-     * Навигация к указанной директории.
-     *
-     * Navigates to the specified directory.
-     *
-     * @param path путь к директории / path to the directory
-     */
     private void navigateToDirectory(String path) {
         updateViews(path);
         log("Изменена директория: " + path);
         setStatusMessage("Переход в директорию: " + path);
     }
 
-    /**
-     * Обновляет представления дерева файлов и сетки файлов.
-     *
-     * Updates the file tree and file grid views.
-     *
-     * @param path путь к директории / path to the directory
-     */
     public void updateViews(String path) {
         fileTreeTable.updateTreeItems(rootDirectory.getPath());
         fileGridView.updateGridView(path);
         updateDirectoryHBox(path);
     }
 
-    /**
-     * Переключается на представление сетки файлов для указанной директории.
-     *
-     * Switches to the file grid view for the specified directory.
-     *
-     * @param directoryPath путь к директории / path to the directory
-     */
     private void switchToFileGridView(String directoryPath) {
         fileGridView.updateGridView(directoryPath);
         fileBrowserScrollPane.setContent(fileGridView.getGridPane());
@@ -556,11 +458,6 @@ public class Controller {
         setStatusMessage("Просмотр файлов в директории: " + directoryPath);
     }
 
-    /**
-     * Переключается на представление системных файлов.
-     *
-     * Switches to the system view.
-     */
     private void switchToSystemHandler() {
         systemHandler.updateSystemView();
         fileBrowserScrollPane.setContent(systemHandler.getGridPane());
@@ -569,11 +466,6 @@ public class Controller {
         setStatusMessage("Просмотр системных файлов");
     }
 
-    /**
-     * Переключается на представление корзины.
-     *
-     * Switches to the trash view.
-     */
     public void switchToTrashHandler() {
         trashHandler.updateTrashView();
         fileBrowserScrollPane.setContent(trashHandler.getGridPane());
@@ -594,12 +486,7 @@ public class Controller {
         return rootDirectory;
     }
 
-    /**
-     * Сохраняет отчет журнала в файл.
-     *
-     * Saves the log report to a file.
-     */
-    private void saveLogReport() { // Убираем импорты отсюда
+    private void saveLogReport() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Сохранить отчет журнала");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "*.log"));
@@ -618,7 +505,6 @@ public class Controller {
                 log("Отчет журнала сохранен в: " + file.getAbsolutePath());
                 setStatusMessage("Отчет журнала сохранен");
 
-                // Устанавливаем файл в режим только для чтения
                 if (file.setReadOnly()) {
                     log("Файл установлен в режим только для чтения");
                 } else {
@@ -656,11 +542,6 @@ public class Controller {
         }
     }
 
-    /**
-     * Обрабатывает процесс установки.
-     * Запрашивает у пользователя директорию для установки, клонирует репозиторий,
-     * создает необходимые директории и устанавливает компоненты.
-     */
     private void handleInstallation() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Выберите директорию для установки");
@@ -681,12 +562,6 @@ public class Controller {
         }
     }
 
-    /**
-     * Создает необходимые директории для установки.
-     *
-     * @param installPath Путь к директории установки.
-     * @throws IOException Если происходит ошибка ввода-вывода.
-     */
     private void setupDirectories(Path installPath) throws IOException {
         Files.createDirectories(installPath.resolve(HOME_DIR));
         Files.createDirectories(installPath.resolve(TRASH_DIR));
@@ -695,13 +570,6 @@ public class Controller {
         Files.createDirectories(installPath.resolve(TEMP_DIR));
     }
 
-    /**
-     * Клонирует репозиторий с GitHub в указанную временную директорию.
-     *
-     * @param installPath Путь к директории установки.
-     * @throws IOException          Если происходит ошибка ввода-вывода.
-     * @throws InterruptedException Если происходит ошибка прерывания.
-     */
     private void cloneGitHubRepo(Path installPath) throws IOException, InterruptedException {
         ProcessBuilder builder = new ProcessBuilder();
         builder.command("git", "clone", GITHUB_REPO_URL, installPath.resolve(TEMP_DIR).toString());
@@ -710,28 +578,14 @@ public class Controller {
         process.waitFor();
     }
 
-    /**
-     * Устанавливает компоненты приложения из временной директории в нужные места.
-     *
-     * @param installPath Путь к директории установки.
-     * @throws IOException Если происходит ошибка ввода-вывода.
-     */
     private void installComponents(Path installPath) throws IOException {
-        // Перемещаем файлы из временной директории в нужные места
         Files.move(installPath.resolve(TEMP_DIR).resolve("path/to/javafx"), installPath.resolve(JAVA_FX_LIB));
         Files.move(installPath.resolve(TEMP_DIR).resolve("path/to/fonts"), installPath.resolve(FONTS_DIR));
-        // Удаляем временную директорию
         deleteDirectory(installPath.resolve(TEMP_DIR).toFile());
 
-        // Добавляем приложение в меню
         createDesktopEntry(installPath);
     }
 
-    /**
-     * Удаляет указанную директорию рекурсивно.
-     *
-     * @param directoryToBeDeleted Директория для удаления.
-     */
     private void deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {
@@ -742,12 +596,6 @@ public class Controller {
         directoryToBeDeleted.delete();
     }
 
-    /**
-     * Создает запись для запуска приложения в меню приложений.
-     *
-     * @param installPath Путь к директории установки.
-     * @throws IOException Если происходит ошибка ввода-вывода.
-     */
     private void createDesktopEntry(Path installPath) throws IOException {
         String desktopEntry = "[Desktop Entry]\n" +
                 "Version=1.0\n" +
@@ -761,11 +609,6 @@ public class Controller {
         Files.write(desktopEntryPath, desktopEntry.getBytes());
     }
 
-    /**
-     * Устанавливает сообщение статуса в интерфейсе.
-     *
-     * @param message Сообщение для установки.
-     */
     public void setStatusMessage(String message) {
         if (statusLabel != null) {
             statusLabel.setText(message);
