@@ -6,16 +6,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.Semaphore;
 
-/**
- * Класс FileMappingHandler отвечает за управление общим доступом к памяти для межпроцессного взаимодействия.
- * Он предоставляет методы для записи и чтения данных из общей памяти.
-
- * The FileMappingHandler class is responsible for managing shared memory for inter-process communication.
- * It provides methods for writing and reading data from shared memory.
- *
- * <p>Автор: Дмитрий Задисенцев</p>
- * <p>Version: 1.0</p>
- */
 public class FileMappingHandler {
     private static final String FILE_PATH = "shared_memory.bin";
     private static final int FILE_SIZE = 1024 * 1024; // 1 MB
