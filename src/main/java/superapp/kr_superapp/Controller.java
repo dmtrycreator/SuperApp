@@ -587,33 +587,47 @@ private static final String TEMP_DIR = "src/main/temp";
      *
      * Saves the log report to a file.
      */
-    private void saveLogReport() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Сохранить отчет журнала");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
-        fileChooser.setInitialFileName("log_report.txt");
+ import javafx.stage.FileChooser;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
-        File initialDirectory = new File("src/main/log");
-        if (!initialDirectory.exists()) {
-            initialDirectory.mkdirs();
-        }
-        fileChooser.setInitialDirectory(initialDirectory);
+private void saveLogReport() {
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.setTitle("Сохранить отчет журнала");
+    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "*.log"));
+    fileChooser.setInitialFileName("log.log");
 
-        File file = fileChooser.showSaveDialog(stackMain.getScene().getWindow());
-        if (file != null) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                writer.write(logBuilder.toString());
-                log("Отчет журнала сохранен в: " + file.getAbsolutePath());
-                setStatusMessage("Отчет журнала сохранен");
-            } catch (IOException e) {
-                log("Ошибка сохранения отчета журнала: " + e.getMessage());
-                setStatusMessage("Ошибка сохранения отчета журнала");
-            }
-        } else {
-            log("Сохранение отчета журнала отменено");
-            setStatusMessage("Сохранение отчета журнала отменено");
-        }
+    File initialDirectory = new File("src/main/log");
+    if (!initialDirectory.exists()) {
+        initialDirectory.mkdirs();
     }
+    fileChooser.setInitialDirectory(initialDirectory);
+
+    File file = fileChooser.showSaveDialog(stackMain.getScene().getWindow());
+    if (file != null) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            writer.write(logBuilder.toString());
+            log("Отчет журнала сохранен в: " + file.getAbsolutePath());
+            setStatusMessage("Отчет журнала сохранен");
+
+            // Устанавливаем файл в режим только для чтения
+            if (file.setReadOnly()) {
+                log("Файл установлен в режим только для чтения");
+            } else {
+                log("Не удалось установить файл в режим только для чтения");
+            }
+        } catch (IOException e) {
+            log("Ошибка сохранения отчета журнала: " + e.getMessage());
+            setStatusMessage("Ошибка сохранения отчета журнала");
+        }
+    } else {
+        log("Сохранение отчета журнала отменено");
+        setStatusMessage("Сохранение отчета журнала отменено");
+    }
+}
+
 
 public void updateTrashLabel() {
         Path trashPath = Paths.get("src/main/trash");
