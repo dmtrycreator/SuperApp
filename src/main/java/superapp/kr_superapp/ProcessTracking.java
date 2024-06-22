@@ -1,28 +1,27 @@
 package superapp.kr_superapp;
 
-import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
+import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.geometry.Pos; // Добавляем этот импорт
-import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
+import javafx.stage.Stage;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,20 +30,38 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.Arrays;
 
 import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 
 public class ProcessTracking {
+
+    @FXML
+    private TableView<ProcessInfo> processTrackingTableView;
+    @FXML
+    private TableColumn<ProcessInfo, Integer> pidColumn;
+    @FXML
+    private TableColumn<ProcessInfo, String> nameColumn;
+    @FXML
+    private TableColumn<ProcessInfo, Double> cpuUsageColumn;
+    @FXML
+    private TableColumn<ProcessInfo, Long> memoryUsageColumn;
+    @FXML
+    private ComboBox<String> processFilterComboBox;
+    @FXML
+    private MenuItem menu_item_report;
+    @FXML
+    private Label statusLabel;
+    private ObservableList<ProcessInfo> processList;
 
     @FXML
     private ResourceBundle resources;
@@ -62,16 +79,10 @@ public class ProcessTracking {
     private VBox main_vbox;
 
     @FXML
-    private TableView<ProcessInfo> processTrackingTableView;
-
-    @FXML
     private MenuItem resourseMenuItem;
 
     @FXML
     private Button restartButton;
-
-    @FXML
-    private MenuItem menu_item_report;
 
     @FXML
     private MenuItem searchMenuItem;
@@ -83,12 +94,7 @@ public class ProcessTracking {
     private MenuBar settingsMenu;
 
     @FXML
-    private Label statusLabel;
-
-    @FXML
     private RadioMenuItem superAppProcessesMenuItem;
-
-    private ObservableList<ProcessInfo> processList;
 
     @FXML
     private StackPane stackMain;
@@ -101,8 +107,9 @@ public class ProcessTracking {
     private long previousBytesSent = 0;
     private long startTime = System.currentTimeMillis() / 1000;
 
-    @FXML
-    void initialize() {
+    private StringBuilder logBuilder = new StringBuilder();
+
+    public void initialize() {
         initializeTableColumns();
         updateProcessTable();
 
@@ -120,6 +127,8 @@ public class ProcessTracking {
         resourseMenuItem.setOnAction(event -> openResourceMonitorOverlay());
 
         setupKeyShortcuts();
+
+        menu_item_report.setOnAction(event -> saveLogReport());
     }
 
     private void setupKeyShortcuts() {
@@ -156,19 +165,10 @@ public class ProcessTracking {
     }
 
     private void initializeTableColumns() {
-        TableColumn<ProcessInfo, Integer> pidColumn = new TableColumn<>("PID");
-        pidColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getPid()));
-
-        TableColumn<ProcessInfo, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getName()));
-
-        TableColumn<ProcessInfo, Double> cpuColumn = new TableColumn<>("CPU Usage (%)");
-        cpuColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getCpuUsage()));
-
-        TableColumn<ProcessInfo, Double> memoryColumn = new TableColumn<>("Memory Usage (MB)");
-        memoryColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getMemoryUsage()));
-
-        processTrackingTableView.getColumns().addAll(pidColumn, nameColumn, cpuColumn, memoryColumn);
+        pidColumn.setCellValueFactory(data -> data.getValue().pidProperty().asObject());
+        nameColumn.setCellValueFactory(data -> data.getValue().nameProperty());
+        cpuUsageColumn.setCellValueFactory(data -> data.getValue().cpuUsageProperty().asObject());
+        memoryUsageColumn.setCellValueFactory(data -> data.getValue().memoryUsageProperty().asObject());
     }
 
     private void updateProcessTable() {
@@ -188,10 +188,10 @@ public class ProcessTracking {
             FileMappingHandler fileMappingHandler = new FileMappingHandler();
             String processCount = String.valueOf(processList.size());
             fileMappingHandler.writeData(processCount.getBytes());
-            Controller.log("Количество процессов записано в общую память: " + processCount);
+            log("Количество процессов записано в общую память: " + processCount);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            Controller.log("Ошибка записи количества процессов в общую память: " + e.getMessage());
+            log("Ошибка записи количества процессов в общую память: " + e.getMessage());
         }
     }
 
@@ -205,7 +205,7 @@ public class ProcessTracking {
         return processes.stream().map(proc -> new ProcessInfo(
                 proc.getProcessID(),
                 proc.getName(),
-                100d * (proc.getKernelTime() + proc.getUserTime()) / proc.getUpTime(),
+                Math.round(100d * (proc.getKernelTime() + proc.getUserTime()) / proc.getUpTime() * 100.0) / 100.0,
                 proc.getResidentSetSize() / (1024 * 1024),
                 proc.getState().name(),
                 proc.getPriority(),
@@ -227,7 +227,7 @@ public class ProcessTracking {
                     .collect(Collectors.toList());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            Controller.log("Ошибка чтения из общей памяти: " + e.getMessage());
+            log("Ошибка чтения из общей памяти: " + e.getMessage());
             return FXCollections.observableArrayList();
         }
     }
@@ -596,21 +596,52 @@ public class ProcessTracking {
         }
     }
 
+    private void log(String message) {
+        logBuilder.append(message).append("\n");
+        setStatusMessage(message);
+    }
+
+    private void setStatusMessage(String message) {
+        if (statusLabel != null) {
+            statusLabel.setText(message);
+        } else {
+            System.err.println("statusLabel is not initialized");
+        }
+    }
+
+    private void saveLogReport() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Сохранить отчет о процессах");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+        fileChooser.setInitialFileName("process_report.txt");
+
+        File file = fileChooser.showSaveDialog(processTrackingTableView.getScene().getWindow());
+        if (file != null) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                for (ProcessInfo process : processList) {
+                    writer.write(String.format("PID: %d, Name: %s, CPU Usage: %.2f%%, Memory Usage: %d MB, Executable Path: %s%n",
+                            process.getPid(), process.getName(), process.getCpuUsage(), process.getMemoryUsage(), process.getExecutablePath()));
+                }
+                log("Отчет сохранен в: " + file.getAbsolutePath());
+                setStatusMessage("Отчет сохранен в: " + file.getAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+                log("Ошибка при сохранении отчета: " + e.getMessage());
+                setStatusMessage("Ошибка при сохранении отчета.");
+            }
+        }
+    }
+
     public void initializeWithData(String sharedData) {
-        // Логика инициализации с использованием пути к директории
-        updateProcessList(Paths.get(sharedData));
+        Path currentDirectory = Paths.get(sharedData);
+        updateProcessList(currentDirectory);
     }
 
     private void updateProcessList(Path directoryPath) {
-        // Получение всех процессов
         List<ProcessInfo> processes = getAllProcesses();
-
-        // Фильтрация процессов, связанных с указанной директорией
         List<ProcessInfo> filteredProcesses = processes.stream()
                 .filter(process -> process.getExecutablePath().startsWith(directoryPath.toString()))
                 .collect(Collectors.toList());
-
-        // Обновление списка процессов и таблицы
         processList = FXCollections.observableArrayList(filteredProcesses);
         processTrackingTableView.setItems(processList);
     }
