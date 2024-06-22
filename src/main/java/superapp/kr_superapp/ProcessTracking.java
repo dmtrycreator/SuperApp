@@ -42,6 +42,7 @@ import java.util.Arrays;
 import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 
 public class ProcessTracking {
 
