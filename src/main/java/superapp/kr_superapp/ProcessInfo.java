@@ -1,3 +1,5 @@
+package superapp.kr_superapp;
+
 public class ProcessInfo {
     private int pid;
     private String name;
