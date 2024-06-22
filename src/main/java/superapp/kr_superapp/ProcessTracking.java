@@ -5,27 +5,25 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
-import javafx.geometry.Pos;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.control.Button;
+import javafx.stage.Stage;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -34,17 +32,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-
 import oshi.SystemInfo;
-import oshi.hardware.NetworkIF;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class ProcessTracking {
 
@@ -95,10 +85,6 @@ public class ProcessTracking {
     @FXML
     private StackPane stackMain;
 
-    private SystemMonitor systemMonitor = new SystemMonitor();
-    private long previousBytesReceived = 0;
-    private long previousBytesSent = 0;
-    private long startTime = System.currentTimeMillis() / 1000;
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private long updateInterval = 5; // Update interval in seconds, can be adjusted in settings
 
@@ -114,7 +100,6 @@ public class ProcessTracking {
         actProcessesMenuItem.setSelected(true);
 
         addContextMenu();
-
         startProcessUpdateScheduler();
 
         settingsMenuItem.setOnAction(event -> openSettingsOverlay());
@@ -180,7 +165,7 @@ public class ProcessTracking {
                 processes = processes.stream().filter(process -> process.getCpuUsage() > 0).collect(Collectors.toList());
                 break;
             case "superApp":
-                processes = processes.stream().filter(process -> process.getName().contains("SuperApp") || process.getName().contains("SystemInfoApp")).collect(Collectors.toList());
+                processes = getSuperAppProcesses();
                 break;
         }
         processList = FXCollections.observableArrayList(processes);
@@ -217,6 +202,22 @@ public class ProcessTracking {
         )).collect(Collectors.toList());
     }
 
+    private List<ProcessInfo> getSuperAppProcesses() {
+        try {
+            FileMappingHandler fileMappingHandler = new FileMappingHandler();
+            byte[] data = fileMappingHandler.readData();
+            String[] processNames = new String(data).trim().split(",");
+
+            List<ProcessInfo> processes = getAllProcesses();
+            return processes.stream()
+                    .filter(process -> Arrays.asList(processNames).contains(process.getName()))
+                    .collect(Collectors.toList());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            Controller.log("Ошибка чтения из общей памяти: " + e.getMessage());
+            return FXCollections.observableArrayList();
+        }
+    }
 
     private void showAllProcesses() {
         processList = FXCollections.observableArrayList(getAllProcesses());
@@ -231,9 +232,7 @@ public class ProcessTracking {
     }
 
     private void showSuperAppProcesses() {
-        List<ProcessInfo> superAppProcesses = processList.stream()
-                .filter(process -> process.getName().contains("SuperApp") || process.getName().contains("SystemInfoApp"))
-                .collect(Collectors.toList());
+        List<ProcessInfo> superAppProcesses = getSuperAppProcesses();
         processTrackingTableView.setItems(FXCollections.observableArrayList(superAppProcesses));
     }
 
@@ -585,21 +584,20 @@ public class ProcessTracking {
     }
 
     public void initializeWithData(String sharedData) {
-        // Предположим, что sharedData - это путь к текущей директории
-        Path currentDirectory = Paths.get(sharedData);
-
         // Логика инициализации с использованием пути к директории
-        updateProcessList(currentDirectory);
+        updateProcessList(Paths.get(sharedData));
     }
 
-    // Пример метода для обновления списка процессов с использованием пути к директории
     private void updateProcessList(Path directoryPath) {
-        // Логика для обновления представления процессов с использованием переданного пути
-        // Например, фильтрация процессов, связанных с указанной директорией
+        // Получение всех процессов
         List<ProcessInfo> processes = getAllProcesses();
+
+        // Фильтрация процессов, связанных с указанной директорией
         List<ProcessInfo> filteredProcesses = processes.stream()
                 .filter(process -> process.getExecutablePath().startsWith(directoryPath.toString()))
                 .collect(Collectors.toList());
+
+        // Обновление списка процессов и таблицы
         processList = FXCollections.observableArrayList(filteredProcesses);
         processTrackingTableView.setItems(processList);
     }
