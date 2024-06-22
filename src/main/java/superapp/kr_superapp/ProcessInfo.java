@@ -1,5 +1,13 @@
 package superapp.kr_superapp;
 
+/**
+ * Класс ProcessInfo представляет информацию о процессе.
+ *
+ * The ProcessInfo class represents information about a process.
+ *
+ * <p>Автор: Дмитрий Задисенцев</p>
+ * <p>Version: 1.0</p>
+ */
 public class ProcessInfo {
     private int pid;
     private String name;
