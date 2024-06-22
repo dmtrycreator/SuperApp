@@ -201,6 +201,7 @@ public class FolderController {
             }
             stackMain.getChildren().removeAll(background, searchOverlay);
             log("Поиск выполнен с ключевыми словами: " + keywords);
+            setStatusMessage("Поиск выполнен: " + keywords);
         });
 
         searchOverlay.getChildren().addAll(searchField, searchButton);
@@ -208,6 +209,7 @@ public class FolderController {
 
         background.setOnMouseClicked(event -> stackMain.getChildren().removeAll(background, searchOverlay));
         log("Оверлей поиска показан");
+        setStatusMessage("Поиск запущен");
     }
 
     /**
@@ -239,9 +241,11 @@ public class FolderController {
             stage.setScene(new Scene(root));
             stage.show();
             log("Folder window opened for directory: " + directoryPath + " / Окно папки открыто для директории: " + directoryPath);
+            controller.setStatusMessage("Открыто окно папки для директории: " + directoryPath);
         } catch (IOException e) {
             e.printStackTrace();
             log("Error opening folder window: " + e.getMessage() + " / Ошибка при открытии окна папки: " + e.getMessage());
+            getInstance().setStatusMessage("Ошибка при открытии окна папки: " + e.getMessage());
         }
     }
 
@@ -255,6 +259,7 @@ public class FolderController {
     private void updateViews(String directoryPath) {
         gridViewManager.updateGridView(directoryPath);
         updateDirectoryHBox(directoryPath);
+        setStatusMessage("Представления обновлены для директории: " + directoryPath);
     }
 
     /**
@@ -290,6 +295,7 @@ public class FolderController {
         nameColumn.prefWidthProperty().bind(fileBrowserTreeView.widthProperty().multiply(0.9));
         fileBrowserTreeView.getColumns().addAll(nameColumn);
         updateTreeItems(rootDirectory.getPath());
+        setStatusMessage("Дерево файлов настроено");
     }
 
     /**
@@ -310,8 +316,10 @@ public class FolderController {
 
             gridViewManager.updateGridViewWithFiles(resultFiles);
             updateDirectoryHBox(directoryPath.toString());
+            setStatusMessage("Поиск выполнен по ключевым словам: " + keywords);
         } catch (IOException e) {
             e.printStackTrace();
+            setStatusMessage("Ошибка при выполнении поиска: " + e.getMessage());
         }
     }
 
@@ -327,6 +335,7 @@ public class FolderController {
         fileBrowserTreeView.setRoot(root);
         root.setExpanded(true);
         root.setValue(new FileItem("home", 0, "Folder", rootDirectory.getAbsolutePath()));
+        setStatusMessage("Элементы дерева файлов обновлены для директории: " + directoryPath);
     }
 
     /**
@@ -348,6 +357,7 @@ public class FolderController {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                setStatusMessage("Ошибка при создании узла дерева для пути: " + path + " - " + e.getMessage());
             }
         }
         return node;
@@ -367,6 +377,7 @@ public class FolderController {
                 db.setContent(content);
                 event.consume();
                 log("Drag detected on tree view / Обнаружено перетаскивание на представлении дерева");
+                setStatusMessage("Перетаскивание начато");
             }
         });
 
@@ -376,6 +387,7 @@ public class FolderController {
             }
             event.consume();
             log("Drag over tree view / Перетаскивание над представлением дерева");
+            setStatusMessage("Перетаскивание над деревом файлов");
         });
 
         fileBrowserTreeView.setOnDragDropped(event -> {
@@ -394,9 +406,11 @@ public class FolderController {
                         gridViewManager.updateGridView(gridViewManager.getCurrentDirectory());
                         updateTreeItems(rootDirectory.getPath());
                         log("File moved from " + sourcePath + " to " + destinationPath + " / Файл перемещен с " + sourcePath + " на " + destinationPath);
+                        setStatusMessage("Файл перемещен с " + sourcePath + " на " + destinationPath);
                     } catch (Exception e) {
                         e.printStackTrace();
                         log("Error moving file: " + e.getMessage() + " / Ошибка перемещения файла: " + e.getMessage());
+                        setStatusMessage("Ошибка при перемещении файла: " + e.getMessage());
                     }
                 }
                 success = true;
@@ -411,6 +425,7 @@ public class FolderController {
             }
             event.consume();
             log("Drag over trash pane / Перетаскивание над панелью корзины");
+            setStatusMessage("Перетаскивание над корзиной");
         });
 
         trashPane.setOnDragDropped(event -> {
@@ -423,9 +438,11 @@ public class FolderController {
                         TrashHandler.moveToTrash(file.toPath());
                         updateTreeItems(rootDirectory.getPath());
                         log("File moved to trash: " + file.getPath() + " / Файл перемещен в корзину: " + file.getPath());
+                        setStatusMessage("Файл перемещен в корзину: " + file.getPath());
                     } catch (Exception e) {
                         e.printStackTrace();
                         log("Error moving file to trash: " + e.getMessage() + " / Ошибка перемещения файла в корзину: " + e.getMessage());
+                        setStatusMessage("Ошибка при перемещении файла в корзину: " + e.getMessage());
                     }
                 }
                 success = true;
@@ -445,6 +462,7 @@ public class FolderController {
     public void handleDirectoryChange(String directoryPath) {
         updateViews(directoryPath);
         updateDirectoryHBox(directoryPath);
+        setStatusMessage("Директория изменена на: " + directoryPath);
     }
 
     /**
@@ -494,6 +512,7 @@ public class FolderController {
         }
 
         log("Directory updated to: " + directoryPath + " / Директория обновлена на: " + directoryPath);
+        setStatusMessage("Текущая директория: " + directoryPath);
     }
 
     /**
@@ -521,6 +540,7 @@ public class FolderController {
     private void navigateToDirectory(String directoryPath) {
         updateViews(directoryPath);
         updateDirectoryHBox(directoryPath);
+        setStatusMessage("Перешли в директорию: " + directoryPath);
     }
 
     /**
