@@ -23,7 +23,6 @@ public class SuperApp extends Application {
         // Установка иконки приложения
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/superapp/kr_superapp/icons/Icon_SuperApp.png")));
 
-        // Создание необходимых директорий, если они не существуют
         createDirectories();
 
         if (!isInstalled()) {
