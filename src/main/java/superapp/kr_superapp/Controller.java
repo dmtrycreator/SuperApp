@@ -142,17 +142,16 @@ public class Controller {
 
     private Comparator<Path> currentComparator = Comparator.comparing(path -> path.toFile().lastModified());
 
-// Константы для директорий установки
-private static final String HOME_DIR = "src/main/home";
-private static final String TRASH_DIR = "src/main/trash";
-private static final String FONTS_DIR = "src/main/fonts";
-private static final String JAVA_FX_LIB = "src/main/javafx/lib";
-private static final String INSTALL_FLAG = "src/main/.installed";
+    // Константы для директорий установки
+    private static final String HOME_DIR = "src/main/home";
+    private static final String TRASH_DIR = "src/main/trash";
+    private static final String FONTS_DIR = "src/main/fonts";
+    private static final String JAVA_FX_LIB = "src/main/javafx/lib";
+    private static final String INSTALL_FLAG = "src/main/.installed";
 
-// URL репозитория GitHub и временная директория
-private static final String GITHUB_REPO_URL = "https://github.com/dmtrycreator/SuperApp.git";
-private static final String TEMP_DIR = "src/main/temp";
-
+    // URL репозитория GitHub и временная директория
+    private static final String GITHUB_REPO_URL = "https://github.com/dmtrycreator/SuperApp.git";
+    private static final String TEMP_DIR = "src/main/temp";
 
     /**
      * Конструктор для создания и инициализации Controller.
@@ -295,7 +294,6 @@ private static final String TEMP_DIR = "src/main/temp";
     public static void log(String message) {
         logBuilder.append(LocalTime.now()).append(" - ").append(message).append("\n");
     }
-
 
     /**
      * Показывает оверлей для создания нового файла.
@@ -587,49 +585,42 @@ private static final String TEMP_DIR = "src/main/temp";
      *
      * Saves the log report to a file.
      */
- import javafx.stage.FileChooser;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+    private void saveLogReport() { // Убираем импорты отсюда
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Сохранить отчет журнала");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "*.log"));
+        fileChooser.setInitialFileName("log.log");
 
-private void saveLogReport() {
-    FileChooser fileChooser = new FileChooser();
-    fileChooser.setTitle("Сохранить отчет журнала");
-    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "*.log"));
-    fileChooser.setInitialFileName("log.log");
-
-    File initialDirectory = new File("src/main/log");
-    if (!initialDirectory.exists()) {
-        initialDirectory.mkdirs();
-    }
-    fileChooser.setInitialDirectory(initialDirectory);
-
-    File file = fileChooser.showSaveDialog(stackMain.getScene().getWindow());
-    if (file != null) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write(logBuilder.toString());
-            log("Отчет журнала сохранен в: " + file.getAbsolutePath());
-            setStatusMessage("Отчет журнала сохранен");
-
-            // Устанавливаем файл в режим только для чтения
-            if (file.setReadOnly()) {
-                log("Файл установлен в режим только для чтения");
-            } else {
-                log("Не удалось установить файл в режим только для чтения");
-            }
-        } catch (IOException e) {
-            log("Ошибка сохранения отчета журнала: " + e.getMessage());
-            setStatusMessage("Ошибка сохранения отчета журнала");
+        File initialDirectory = new File("src/main/log");
+        if (!initialDirectory.exists()) {
+            initialDirectory.mkdirs();
         }
-    } else {
-        log("Сохранение отчета журнала отменено");
-        setStatusMessage("Сохранение отчета журнала отменено");
+        fileChooser.setInitialDirectory(initialDirectory);
+
+        File file = fileChooser.showSaveDialog(stackMain.getScene().getWindow());
+        if (file != null) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                writer.write(logBuilder.toString());
+                log("Отчет журнала сохранен в: " + file.getAbsolutePath());
+                setStatusMessage("Отчет журнала сохранен");
+
+                // Устанавливаем файл в режим только для чтения
+                if (file.setReadOnly()) {
+                    log("Файл установлен в режим только для чтения");
+                } else {
+                    log("Не удалось установить файл в режим только для чтения");
+                }
+            } catch (IOException e) {
+                log("Ошибка сохранения отчета журнала: " + e.getMessage());
+                setStatusMessage("Ошибка сохранения отчета журнала");
+            }
+        } else {
+            log("Сохранение отчета журнала отменено");
+            setStatusMessage("Сохранение отчета журнала отменено");
+        }
     }
-}
 
-
-public void updateTrashLabel() {
+    public void updateTrashLabel() {
         Path trashPath = Paths.get("src/main/trash");
         try (Stream<Path> elements = Files.walk(trashPath)) {
             long elementCount = elements.filter(Files::isRegularFile).count();
