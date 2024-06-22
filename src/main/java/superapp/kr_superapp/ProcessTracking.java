@@ -166,10 +166,10 @@ public class ProcessTracking {
     }
 
     private void initializeTableColumns() {
-        pidColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getPid()));
-        nameColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getName()));
-        cpuUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getCpuUsage() * 100.0) / 100.0));
-        memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getMemoryUsage()));
+    pidColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getPid()));
+    nameColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getName()));
+    cpuUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getCpuUsage() * 100.0) / 100.0));
+    memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getMemoryUsage()));
     }
 
     private void updateProcessTable() {
