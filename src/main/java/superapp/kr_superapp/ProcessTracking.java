@@ -165,10 +165,10 @@ public class ProcessTracking {
     }
 
     private void initializeTableColumns() {
-        pidColumn.setCellValueFactory(data -> data.getValue().pidProperty().asObject());
-        nameColumn.setCellValueFactory(data -> data.getValue().nameProperty());
-        cpuUsageColumn.setCellValueFactory(data -> data.getValue().cpuUsageProperty().asObject());
-        memoryUsageColumn.setCellValueFactory(data -> data.getValue().memoryUsageProperty().asObject());
+        pidColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getPid()));
+        nameColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getName()));
+        cpuUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getCpuUsage() * 100.0) / 100.0));
+        memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getMemoryUsage()));
     }
 
     private void updateProcessTable() {
@@ -613,7 +613,7 @@ public class ProcessTracking {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Сохранить отчет о процессах");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
-        fileChooser.setInitialFileName("process_report.txt");
+        fileChooser.setInitialFileName("process_log.log");
 
         File file = fileChooser.showSaveDialog(processTrackingTableView.getScene().getWindow());
         if (file != null) {
