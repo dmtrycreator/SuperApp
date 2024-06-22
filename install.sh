@@ -8,7 +8,7 @@ fi
 
 # Установка необходимых пакетов
 sudo apt update
-sudo apt install -y openjdk-21-jdk git maven unzip
+sudo apt install -y openjdk-21-jdk git maven unzip curl
 
 # Удаление старой версии приложения, если она существует
 if [ -d "$HOME/SuperApp" ]; then
