@@ -42,16 +42,22 @@ public class MenuHandler {
             String filePath = new String(fileMappingHandler.readData()).trim();
             log("Путь к файлу прочитан из общей памяти: " + filePath);
 
-            String javafxPath = "lib/javafx-sdk-22.0.1/lib";
+            String javafxPath = "/opt/javafx/lib";
+            String classPath = System.getProperty("java.class.path");
 
-            new ProcessBuilder(
+            log("Запуск приложения с классом: " + appClassName + " и путём: " + filePath);
+
+            Process process = new ProcessBuilder(
                     "java",
                     "--module-path", javafxPath,
                     "--add-modules", "javafx.controls,javafx.fxml",
-                    "-cp", System.getProperty("java.class.path"),
+                    "-cp", classPath,
                     appClassName,
                     filePath // Передача пути к файлу как аргумент
             ).start();
+
+            log("Процесс запущен: " + process.toString());
+
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             log("Ошибка чтения из общей памяти или запуска приложения: " + e.getMessage());
