@@ -82,8 +82,10 @@ public class FileItemHandler {
                     gridViewManager.updateGridView(path.toString());
                     String relativePath = path.toString().replace(GridViewManager.getRootDirectory().getPath(), "home");
                     FolderController.getInstance().updateDirectoryHBox(relativePath);
+                    FolderController.getInstance().setStatusMessage("Открыта директория: " + path);
                 } else {
                     System.out.println("Директория не найдена: " + path);
+                    FolderController.getInstance().setStatusMessage("Директория не найдена: " + path);
                 }
             }
         });
@@ -92,8 +94,10 @@ public class FileItemHandler {
             if (Files.isDirectory(path)) {
                 if (Files.exists(path)) {
                     FolderController.openFolderWindow(path.toString());
+                    FolderController.getInstance().setStatusMessage("Открыта новая папка для директории: " + path);
                 } else {
                     System.out.println("Directory does not exist: " + path);
+                    FolderController.getInstance().setStatusMessage("Директория не существует: " + path);
                 }
             }
         });
@@ -101,27 +105,43 @@ public class FileItemHandler {
         propertiesItem.setOnAction(event -> {
             try {
                 FileGridView.openFileInfoWindow(path);
+                FolderController.getInstance().setStatusMessage("Показаны свойства для: " + path);
             } catch (IOException e) {
                 e.printStackTrace();
+                FolderController.getInstance().setStatusMessage("Ошибка при показе свойств: " + e.getMessage());
             }
         });
 
-        cutItem.setOnAction(event -> gridViewManager.cutFile(path));
-        copyItem.setOnAction(event -> gridViewManager.copyFile(path));
-        pasteItem.setOnAction(event -> gridViewManager.pasteFile());
+        cutItem.setOnAction(event -> {
+            gridViewManager.cutFile(path);
+            FolderController.getInstance().setStatusMessage("Вырезан файл: " + path);
+        });
+        copyItem.setOnAction(event -> {
+            gridViewManager.copyFile(path);
+            FolderController.getInstance().setStatusMessage("Скопирован файл: " + path);
+        });
+        pasteItem.setOnAction(event -> {
+            gridViewManager.pasteFile();
+            FolderController.getInstance().setStatusMessage("Вставлен файл");
+        });
 
         deleteItem.setOnAction(event -> {
             try {
                 TrashHandler.moveToTrash(path);
                 gridViewManager.updateGridView(path.getParent().toString());
                 gridViewManager.updateTreeItems(GridViewManager.getRootDirectory().getPath());
-                Controller.getInstance().updateTrashLabel(); 
+                Controller.getInstance().updateTrashLabel();
+                FolderController.getInstance().setStatusMessage("Удален файл: " + path);
             } catch (Exception e) {
                 e.printStackTrace();
+                FolderController.getInstance().setStatusMessage("Ошибка при удалении файла: " + e.getMessage());
             }
         });
 
-        renameItem.setOnAction(event -> gridViewManager.showRenameOverlay(path));
+        renameItem.setOnAction(event -> {
+            gridViewManager.showRenameOverlay(path);
+            FolderController.getInstance().setStatusMessage("Переименован файл: " + path);
+        });
 
         DragAndDropUtil.setupDragAndDropSource(vbox, path);
         DragAndDropUtil.setupDragAndDropTarget(vbox, sourcePath -> {
@@ -130,9 +150,11 @@ public class FileItemHandler {
                 Files.move(sourcePath, targetPath);
                 gridViewManager.updateGridView(gridViewManager.getCurrentDirectory());
                 gridViewManager.updateTreeItems(GridViewManager.getRootDirectory().getPath());
-                Controller.getInstance().updateTrashLabel(); 
+                Controller.getInstance().updateTrashLabel();
+                FolderController.getInstance().setStatusMessage("Перемещен файл с " + sourcePath + " на " + targetPath);
             } catch (IOException e) {
                 e.printStackTrace();
+                FolderController.getInstance().setStatusMessage("Ошибка при перемещении файла: " + e.getMessage());
             }
         });
 
@@ -153,6 +175,7 @@ public class FileItemHandler {
                     gridViewManager.updateGridView(path.toString());
                     String relativePath = path.toString().replace(GridViewManager.getRootDirectory().getPath(), "home");
                     FolderController.getInstance().updateDirectoryHBox(relativePath);
+                    FolderController.getInstance().setStatusMessage("Открыта директория: " + path);
                 }
             }
         }
