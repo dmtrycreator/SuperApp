@@ -1,5 +1,6 @@
 package superapp.kr_superapp;
 
+import javafx.application.Platform;
 import javafx.scene.control.MenuItem;
 
 import java.io.IOException;
@@ -18,9 +19,9 @@ public class MenuHandler {
     }
 
     private void addMenuHandlers() {
-        menu_item_system_info.setOnAction(event -> openSystemInfo());
-        menu_item_processes.setOnAction(event -> openProcessTracking());
-        menu_item_terminal.setOnAction(event -> openTerminal());
+        menu_item_system_info.setOnAction(event -> Platform.runLater(this::openSystemInfo));
+        menu_item_processes.setOnAction(event -> Platform.runLater(this::openProcessTracking));
+        menu_item_terminal.setOnAction(event -> Platform.runLater(this::openTerminal));
     }
 
     private void openSystemInfo() {
@@ -51,7 +52,7 @@ public class MenuHandler {
                     appClassName,
                     filePath // Передача пути к файлу как аргумент
             ).start();
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             log("Ошибка чтения из общей памяти или запуска приложения: " + e.getMessage());
         }
