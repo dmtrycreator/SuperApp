@@ -169,7 +169,7 @@ public class ProcessTracking {
     pidColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getPid()));
     nameColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getName()));
     cpuUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getCpuUsage() * 100.0) / 100.0));
-    memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getMemoryUsage()));
+memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getMemoryUsage())));
     }
 
     private void updateProcessTable() {
