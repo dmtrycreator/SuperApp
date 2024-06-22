@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class ProcessTrackingApp extends Application {
@@ -15,14 +16,12 @@ public class ProcessTrackingApp extends Application {
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         primaryStage.setTitle("Process Tracking");
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/superapp/kr_superapp/icons/Process.png")));
         primaryStage.setScene(scene);
 
-        // Чтение данных из общей памяти
         FileMappingHandler fileMappingHandler = new FileMappingHandler();
         String sharedData = new String(fileMappingHandler.readData()).trim();
 
-        // Использование прочитанных данных
-        // Например, передача данных в контроллер
         ProcessTracking controller = loader.getController();
         controller.initializeWithData(sharedData);
 
