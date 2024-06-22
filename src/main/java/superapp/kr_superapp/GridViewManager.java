@@ -83,8 +83,10 @@ public class GridViewManager {
                 }
             }
             scrollPane.setContent(gridPane);
+            FolderController.getInstance().setStatusMessage("Обновлено представление для директории: " + directoryPath);
         } catch (Exception e) {
             e.printStackTrace();
+            FolderController.getInstance().setStatusMessage("Ошибка при обновлении представления: " + e.getMessage());
         }
     }
 
@@ -105,16 +107,19 @@ public class GridViewManager {
             gridPane.add(vbox, column, row);
             index++;
         }
+        FolderController.getInstance().setStatusMessage("Обновлено представление для найденных файлов");
     }
 
     public void clearSelection() {
         selectedFiles.clear();
         gridPane.getChildren().forEach(node -> node.setStyle("-fx-background-color: transparent;"));
+        FolderController.getInstance().setStatusMessage("Выбор файлов очищен");
     }
 
     public void selectItem(Path path, VBox vbox) {
         selectedFiles.add(path);
         vbox.setStyle("-fx-background-color: #34393E; -fx-background-radius: 5px;");
+        FolderController.getInstance().setStatusMessage("Выбран файл: " + path);
     }
 
     public List<Path> getSelectedFiles() {
@@ -135,6 +140,7 @@ public class GridViewManager {
 
     public void setLastSelectedPath(Path path) {
         this.lastSelectedPath = path;
+        FolderController.getInstance().setStatusMessage("Последний выбранный путь: " + path);
     }
 
     public void showRenameOverlay(Path path) {
@@ -165,8 +171,10 @@ public class GridViewManager {
                 try {
                     Files.move(path, path.resolveSibling(newName));
                     updateGridView(currentDirectory);
+                    FolderController.getInstance().setStatusMessage("Переименован файл: " + path + " в " + newName);
                 } catch (IOException e) {
                     e.printStackTrace();
+                    FolderController.getInstance().setStatusMessage("Ошибка при переименовании файла: " + e.getMessage());
                 }
             }
             stackMain.getChildren().removeAll(background, renameOverlay);
@@ -176,6 +184,7 @@ public class GridViewManager {
         stackMain.getChildren().addAll(background, renameOverlay);
 
         background.setOnMouseClicked(event -> stackMain.getChildren().removeAll(background, renameOverlay));
+        FolderController.getInstance().setStatusMessage("Показан оверлей переименования для: " + path);
     }
 
     /**
@@ -205,6 +214,7 @@ public class GridViewManager {
     public void copyFile(Path source) {
         clipboardFile = source;
         isCutOperation = false;
+        FolderController.getInstance().setStatusMessage("Скопирован файл: " + source);
     }
 
     /**
@@ -217,6 +227,7 @@ public class GridViewManager {
     public void cutFile(Path source) {
         clipboardFile = source;
         isCutOperation = true;
+        FolderController.getInstance().setStatusMessage("Вырезан файл: " + source);
     }
 
     /**
@@ -230,20 +241,20 @@ public class GridViewManager {
             try {
                 if (isCutOperation) {
                     Files.move(clipboardFile, targetPath);
+                    FolderController.getInstance().setStatusMessage("Файл перемещен в: " + targetPath);
                 } else {
                     Files.copy(clipboardFile, targetPath);
+                    FolderController.getInstance().setStatusMessage("Файл скопирован в: " + targetPath);
                 }
                 updateGridView(currentDirectory);
                 Controller.getInstance().getFileTreeTable().updateTreeItems(Controller.getInstance().getRootDirectory().getPath());
                 clipboardFile = null;
             } catch (IOException e) {
                 e.printStackTrace();
+                FolderController.getInstance().setStatusMessage("Ошибка при вставке файла: " + e.getMessage());
             }
         }
     }
-
-
-
 
     public static Image getFolderImage() {
         return new Image(GridViewManager.class.getResourceAsStream("icons/Folder.png"));
@@ -254,6 +265,6 @@ public class GridViewManager {
     }
 
     public void updateTreeItems(String path) {
-     //   fileTreeTable.updateTreeItems(path);
+        // fileTreeTable.updateTreeItems(path);
     }
 }
