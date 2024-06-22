@@ -19,11 +19,16 @@ import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.geometry.Pos;
+import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -87,6 +92,11 @@ public class ProcessTracking {
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private long updateInterval = 5; // Update interval in seconds, can be adjusted in settings
+
+    private SystemMonitor systemMonitor = new SystemMonitor();
+    private long previousBytesReceived = 0;
+    private long previousBytesSent = 0;
+    private long startTime = System.currentTimeMillis() / 1000;
 
     @FXML
     void initialize() {
