@@ -51,12 +51,11 @@ public class MenuHandler {
                     appClassName,
                     filePath // Передача пути к файлу как аргумент
             ).start();
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             log("Ошибка чтения из общей памяти или запуска приложения: " + e.getMessage());
         }
     }
-
 
     public static void log(String message) {
         Controller.log(message);
