@@ -46,59 +46,45 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 
 public class ProcessTracking {
 
-    @FXML
-    private TableView<ProcessInfo> processTrackingTableView;
-    @FXML
-    private TableColumn<ProcessInfo, Integer> pidColumn;
-    @FXML
-    private TableColumn<ProcessInfo, String> nameColumn;
-    @FXML
-    private TableColumn<ProcessInfo, Double> cpuUsageColumn;
-    @FXML
-    private TableColumn<ProcessInfo, Long> memoryUsageColumn;
-    @FXML
-    private ComboBox<String> processFilterComboBox;
-    @FXML
-    private MenuItem menu_item_report;
-    @FXML
-    private Label statusLabel;
-    private ObservableList<ProcessInfo> processList;
+@FXML
+private TableView<ProcessInfo> processTrackingTableView;
 
-    @FXML
-    private ResourceBundle resources;
+@FXML
+private ComboBox<String> processFilterComboBox;
 
-    @FXML
-    private URL location;
+@FXML
+private MenuItem menu_item_report;
 
-    @FXML
-    private RadioMenuItem actProcessesMenuItem;
+@FXML
+private Label statusLabel;
 
-    @FXML
-    private RadioMenuItem allProcessesMenuItem;
+@FXML
+private RadioMenuItem actProcessesMenuItem;
 
-    @FXML
-    private VBox main_vbox;
+@FXML
+private RadioMenuItem allProcessesMenuItem;
 
-    @FXML
-    private MenuItem resourseMenuItem;
+@FXML
+private VBox main_vbox;
 
-    @FXML
-    private Button restartButton;
+@FXML
+private MenuItem resourseMenuItem;
 
-    @FXML
-    private MenuItem searchMenuItem;
+@FXML
+private Button restartButton;
 
-    @FXML
-    private MenuItem settingsMenuItem;
+@FXML
+private MenuItem searchMenuItem;
 
-    @FXML
-    private MenuBar settingsMenu;
+@FXML
+private MenuItem settingsMenuItem;
 
-    @FXML
-    private RadioMenuItem superAppProcessesMenuItem;
+@FXML
+private MenuBar settingsMenu;
 
-    @FXML
-    private StackPane stackMain;
+@FXML
+private StackPane stackMain;
+
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private long updateInterval = 5; // Update interval in seconds, can be adjusted in settings
