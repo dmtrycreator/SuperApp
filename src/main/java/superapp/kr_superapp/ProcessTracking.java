@@ -5,11 +5,6 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -22,9 +17,12 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
-import oshi.SystemInfo;
-import oshi.software.os.OSProcess;
-import oshi.software.os.OperatingSystem;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.geometry.Pos; // Добавляем этот импорт
+import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -41,6 +39,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import oshi.SystemInfo;
+import oshi.software.os.OSProcess;
+import oshi.software.os.OperatingSystem;
 
 public class ProcessTracking {
 
@@ -116,8 +118,6 @@ public class ProcessTracking {
         settingsMenuItem.setOnAction(event -> openSettingsOverlay());
         searchMenuItem.setOnAction(event -> openSearchOverlay());
         resourseMenuItem.setOnAction(event -> openResourceMonitorOverlay());
-
-        menu_item_report.setOnAction(event -> saveLogReport());
 
         setupKeyShortcuts();
     }
@@ -596,45 +596,21 @@ public class ProcessTracking {
         }
     }
 
-    private void saveLogReport() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Сохранить отчет о процессах");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
-        fileChooser.setInitialFileName("process_report.txt");
-
-        File file = fileChooser.showSaveDialog(processTrackingTableView.getScene().getWindow());
-        if (file != null) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                for (ProcessInfo process : processList) {
-                    writer.write(String.format("PID: %d, Name: %s, CPU Usage: %.2f%%, Memory Usage: %d MB, Executable Path: %s%n",
-                            process.getPid(), process.getName(), process.getCpuUsage(), process.getMemoryUsage(), process.getExecutablePath()));
-                }
-                setStatusMessage("Отчет сохранен в: " + file.getAbsolutePath());
-            } catch (IOException e) {
-                e.printStackTrace();
-                setStatusMessage("Ошибка при сохранении отчета.");
-            }
-        }
-    }
-
-    private void setStatusMessage(String message) {
-        if (statusLabel != null) {
-            statusLabel.setText(message);
-        } else {
-            System.err.println("statusLabel is not initialized");
-        }
-    }
-
     public void initializeWithData(String sharedData) {
-        Path currentDirectory = Paths.get(sharedData);
-        updateProcessList(currentDirectory);
+        // Логика инициализации с использованием пути к директории
+        updateProcessList(Paths.get(sharedData));
     }
 
     private void updateProcessList(Path directoryPath) {
+        // Получение всех процессов
         List<ProcessInfo> processes = getAllProcesses();
+
+        // Фильтрация процессов, связанных с указанной директорией
         List<ProcessInfo> filteredProcesses = processes.stream()
                 .filter(process -> process.getExecutablePath().startsWith(directoryPath.toString()))
                 .collect(Collectors.toList());
+
+        // Обновление списка процессов и таблицы
         processList = FXCollections.observableArrayList(filteredProcesses);
         processTrackingTableView.setItems(processList);
     }
