@@ -234,7 +234,10 @@ public class FolderController {
             FXMLLoader loader = new FXMLLoader(FolderController.class.getResource("Folder.fxml"));
             Parent root = loader.load();
             FolderController controller = loader.getController();
-            controller.updateViews(directoryPath);
+
+            FileMappingHandler fileMappingHandler = new FileMappingHandler();
+            String sharedData = new String(fileMappingHandler.readData()).trim();
+            controller.initializeWithData(sharedData);
 
             Stage stage = new Stage();
             stage.setTitle(directoryPath);
@@ -242,12 +245,13 @@ public class FolderController {
             stage.show();
             log("Folder window opened for directory: " + directoryPath + " / Окно папки открыто для директории: " + directoryPath);
             controller.setStatusMessage("Открыто окно папки для директории: " + directoryPath);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             log("Error opening folder window: " + e.getMessage() + " / Ошибка при открытии окна папки: " + e.getMessage());
             getInstance().setStatusMessage("Ошибка при открытии окна папки: " + e.getMessage());
         }
     }
+
 
     /**
      * Обновляет представления для указанной директории.
@@ -553,4 +557,9 @@ public class FolderController {
     public static void log(String message) {
         Controller.log(message);
     }
+
+    public void initializeWithData(String sharedData) {
+        handleDirectoryChange(sharedData);
+    }
+
 }

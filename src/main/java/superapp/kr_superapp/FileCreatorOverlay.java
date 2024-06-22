@@ -122,14 +122,27 @@ public class FileCreatorOverlay {
             }
             fileGridView.updateGridView(fileGridView.getCurrentDirectory());
             Controller.getInstance().getFileTreeTable().updateTreeItems(Controller.getInstance().getRootDirectory().getPath());
+
+            // Запись информации о созданном файле в общую память
+            FileMappingHandler fileMappingHandler = new FileMappingHandler();
+            fileMappingHandler.writeData(newPath.toString().getBytes());
+            Controller.log("Информация о созданном файле записана в общую память: " + newPath.toString());
+
         } catch (AccessDeniedException e) {
             showError("Отказано в доступе: " + e.getFile());
             e.printStackTrace();
         } catch (IOException e) {
             showError("Ошибка создания файла или папки: " + e.getMessage());
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            showError("Ошибка при записи в общую память: " + e.getMessage());
+            e.printStackTrace();
+            Thread.currentThread().interrupt(); // Восстанавливаем флаг прерывания
         }
     }
+
+
+
 
     /**
      * Отображает сообщение об ошибке пользователю.
@@ -145,4 +158,16 @@ public class FileCreatorOverlay {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    private void writeCreatedFilePathToSharedMemory(Path filePath) {
+        try {
+            FileMappingHandler fileMappingHandler = new FileMappingHandler();
+            fileMappingHandler.writeData(filePath.toString().getBytes());
+            Controller.log("Созданный файл/папка записан в общую память: " + filePath);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            Controller.log("Ошибка записи созданного файла/папки в общую память: " + e.getMessage());
+        }
+    }
+
 }

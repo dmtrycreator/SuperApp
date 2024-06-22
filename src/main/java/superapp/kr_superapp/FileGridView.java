@@ -82,6 +82,7 @@ public class FileGridView {
      */
     public void updateGridView(String directoryPath) {
         currentDirectory = directoryPath;
+        writeCurrentDirectoryToSharedMemory();
         gridPane.getChildren().clear();
         try (Stream<Path> paths = Files.list(Paths.get(directoryPath))) {
             List<Path> fileList = paths.collect(Collectors.toList());
@@ -110,6 +111,7 @@ public class FileGridView {
             e.printStackTrace();
         }
     }
+
 
     /**
      * Обрабатывает клик по элементу файла.
@@ -212,9 +214,18 @@ public class FileGridView {
 
         openNewWindowItem.setOnAction(event -> {
             if (Files.isDirectory(path)) {
+                try {
+                    FileMappingHandler fileMappingHandler = new FileMappingHandler();
+                    fileMappingHandler.writeData(path.toString().getBytes());
+                    Controller.log("Текущая директория записана в общую память: " + path.toString());
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                    Controller.log("Ошибка записи текущей директории в общую память: " + e.getMessage());
+                }
                 FolderController.openFolderWindow(path.toString());
             }
         });
+
 
         propertiesItem.setOnAction(event -> {
             try {
@@ -512,15 +523,6 @@ public class FileGridView {
         background.setOnMouseClicked(event -> stackMain.getChildren().removeAll(background, renameOverlay));
     }
 
-    public void sort(Comparator<Path> comparator, boolean ascending) {
-        List<Path> paths = getPaths();
-        paths.sort(comparator);
-        if (!ascending) {
-            Collections.reverse(paths);
-        }
-        updateGridView(paths);
-    }
-
     private List<Path> getPaths() {
         return Arrays.asList(new File(currentDirectory).listFiles())
                 .stream()
@@ -544,4 +546,16 @@ public class FileGridView {
     public StackPane getStackMain() {
         return stackMain;
     }
+
+    public void writeCurrentDirectoryToSharedMemory() {
+        try {
+            FileMappingHandler fileMappingHandler = new FileMappingHandler();
+            fileMappingHandler.writeData(currentDirectory.getBytes());
+            Controller.log("Текущая директория записана в общую память: " + currentDirectory);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            Controller.log("Ошибка записи текущей директории в общую память: " + e.getMessage());
+        }
+    }
+
 }

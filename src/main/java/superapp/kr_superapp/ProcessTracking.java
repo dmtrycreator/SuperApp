@@ -22,33 +22,29 @@ import javafx.geometry.Pos;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.control.Button;
+
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
-
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.RadioMenuItem;
-import javafx.scene.control.TableView;
-import oshi.hardware.NetworkIF;
-import oshi.SystemInfo;
-import oshi.hardware.CentralProcessor;
-import oshi.hardware.GlobalMemory;
-import oshi.hardware.NetworkIF;
-import oshi.software.os.OperatingSystem;
-import oshi.software.os.OSProcess;
-
-import javafx.application.Platform;
-import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.XYChart;
 
+import oshi.SystemInfo;
+import oshi.hardware.NetworkIF;
+import oshi.software.os.OSProcess;
+import oshi.software.os.OperatingSystem;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class ProcessTracking {
 
@@ -105,7 +101,6 @@ public class ProcessTracking {
     private long startTime = System.currentTimeMillis() / 1000;
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private long updateInterval = 5; // Update interval in seconds, can be adjusted in settings
-
 
     @FXML
     void initialize() {
@@ -190,11 +185,38 @@ public class ProcessTracking {
         }
         processList = FXCollections.observableArrayList(processes);
         processTrackingTableView.setItems(processList);
+
+        try {
+            FileMappingHandler fileMappingHandler = new FileMappingHandler();
+            String processCount = String.valueOf(processList.size());
+            fileMappingHandler.writeData(processCount.getBytes());
+            Controller.log("Количество процессов записано в общую память: " + processCount);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            Controller.log("Ошибка записи количества процессов в общую память: " + e.getMessage());
+        }
     }
 
     private List<ProcessInfo> getAllProcesses() {
-        return ProcessUtils.getLinuxProcesses();
+        SystemInfo si = new SystemInfo();
+        OperatingSystem os = si.getOperatingSystem();
+        List<OSProcess> processes = os.getProcesses();
+
+        processes.sort(Comparator.comparingDouble(OSProcess::getProcessCpuLoadCumulative).reversed());
+
+        return processes.stream().map(proc -> new ProcessInfo(
+                proc.getProcessID(),
+                proc.getName(),
+                100d * (proc.getKernelTime() + proc.getUserTime()) / proc.getUpTime(),
+                proc.getResidentSetSize() / (1024 * 1024),
+                proc.getState().name(),
+                proc.getPriority(),
+                proc.getStartTime(),
+                proc.getPath(),
+                proc.getUser()
+        )).collect(Collectors.toList());
     }
+
 
     private void showAllProcesses() {
         processList = FXCollections.observableArrayList(getAllProcesses());
@@ -528,7 +550,6 @@ public class ProcessTracking {
         }
     }
 
-
     private void updateNetworkChart(AreaChart<Number, Number> networkChart) {
         systemMonitor.updateNetworkStats();
 
@@ -561,5 +582,25 @@ public class ProcessTracking {
             seriesRecv.getData().remove(0);
             seriesSent.getData().remove(0);
         }
+    }
+
+    public void initializeWithData(String sharedData) {
+        // Предположим, что sharedData - это путь к текущей директории
+        Path currentDirectory = Paths.get(sharedData);
+
+        // Логика инициализации с использованием пути к директории
+        updateProcessList(currentDirectory);
+    }
+
+    // Пример метода для обновления списка процессов с использованием пути к директории
+    private void updateProcessList(Path directoryPath) {
+        // Логика для обновления представления процессов с использованием переданного пути
+        // Например, фильтрация процессов, связанных с указанной директорией
+        List<ProcessInfo> processes = getAllProcesses();
+        List<ProcessInfo> filteredProcesses = processes.stream()
+                .filter(process -> process.getExecutablePath().startsWith(directoryPath.toString()))
+                .collect(Collectors.toList());
+        processList = FXCollections.observableArrayList(filteredProcesses);
+        processTrackingTableView.setItems(processList);
     }
 }

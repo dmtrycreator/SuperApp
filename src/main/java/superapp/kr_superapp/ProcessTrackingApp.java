@@ -16,6 +16,16 @@ public class ProcessTrackingApp extends Application {
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         primaryStage.setTitle("Process Tracking");
         primaryStage.setScene(scene);
+
+        // Чтение данных из общей памяти
+        FileMappingHandler fileMappingHandler = new FileMappingHandler();
+        String sharedData = new String(fileMappingHandler.readData()).trim();
+
+        // Использование прочитанных данных
+        // Например, передача данных в контроллер
+        ProcessTracking controller = loader.getController();
+        controller.initializeWithData(sharedData);
+
         primaryStage.show();
     }
 

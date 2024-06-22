@@ -33,11 +33,13 @@ public class ProcessUtils {
             int pid = process.getProcessID();
             String name = process.getName();
             double cpuUsage = 100d * (process.getKernelTime() + process.getUserTime()) / process.getUpTime();
-            double memoryUsage = process.getResidentSetSize();
+            double memoryUsage = process.getResidentSetSize() / (1024 * 1024); // Convert to MB
             String state = process.getState().name();
             int priority = process.getPriority();
             long startTime = process.getStartTime();
-            processList.add(new ProcessInfo(pid, name, cpuUsage, memoryUsage, state, priority, startTime));
+            String executablePath = process.getPath();
+            String userName = process.getUser();
+            processList.add(new ProcessInfo(pid, name, cpuUsage, memoryUsage, state, priority, startTime, executablePath, userName));
         }
         return processList;
     }
@@ -88,7 +90,6 @@ public class ProcessUtils {
             return Duration.ZERO;
         }
     }
-
 
     /**
      * Получает время работы приложения.

@@ -306,6 +306,18 @@ public class Controller {
         setStatusMessage("Создание нового файла");
     }
 
+    public void writeFilePathToSharedMemory(String filePath) {
+        try {
+            FileMappingHandler fileMappingHandler = new FileMappingHandler();
+            fileMappingHandler.writeData(filePath.getBytes());
+            log("Путь к файлу записан в общую память: " + filePath);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            log("Ошибка записи пути к файлу в общую память: " + e.getMessage());
+        }
+    }
+
+
     /**
      * Обрабатывает изменение директории.
      *
@@ -319,7 +331,9 @@ public class Controller {
         updateDirectoryHBox(directoryPath);
         log("Директория изменена на: " + directoryPath);
         setStatusMessage("Переход в директорию: " + directoryPath);
+        writeFilePathToSharedMemory(directoryPath);
     }
+
 
     /**
      * Показывает панель "Обо мне".

@@ -41,7 +41,7 @@ public class MenuHandler {
             String filePath = new String(fileMappingHandler.readData()).trim();
             log("Путь к файлу прочитан из общей памяти: " + filePath);
 
-            String javafxPath = "/home/dmtrycreator/IdeaProjects/CM/KR_SuperApp/openjfx-22.0.1_linux-x64_bin-sdk/javafx-sdk-22.0.1/lib";
+            String javafxPath = "lib/javafx-sdk-22.0.1/lib";
 
             new ProcessBuilder(
                     "java",
@@ -56,6 +56,7 @@ public class MenuHandler {
             log("Ошибка чтения из общей памяти или запуска приложения: " + e.getMessage());
         }
     }
+
 
     public static void log(String message) {
         Controller.log(message);
