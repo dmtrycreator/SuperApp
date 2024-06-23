@@ -5,7 +5,6 @@ import javafx.scene.control.MenuItem;
 import java.io.IOException;
 
 public class MenuHandler {
-
     private MenuItem menu_item_system_info;
     private MenuItem menu_item_processes;
     private MenuItem menu_item_terminal;
@@ -42,7 +41,7 @@ public class MenuHandler {
                 String filePath = new String(fileMappingHandler.readData()).trim();
                 log("Путь к файлу прочитан из общей памяти: " + filePath);
 
-                String javafxPath = "/opt/javafx/lib";
+                String javafxPath = "/opt/javafx/lib";  
 
                 ProcessBuilder processBuilder = new ProcessBuilder(
                         "java",
@@ -55,6 +54,7 @@ public class MenuHandler {
 
                 processBuilder.inheritIO(); // Выводим все логи в консоль для отладки
                 Process process = processBuilder.start();
+
                 int exitCode = process.waitFor();
                 log("Приложение завершилось с кодом: " + exitCode);
             } catch (IOException | InterruptedException e) {
@@ -63,9 +63,9 @@ public class MenuHandler {
             }
         }).start();
     }
-    
 
     public static void log(String message) {
         Controller.log(message);
     }
 }
+
