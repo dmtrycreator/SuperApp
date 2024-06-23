@@ -215,9 +215,11 @@ public class ProcessTracking {
                 proc.getPriority(),
                 proc.getStartTime(),
                 proc.getPath(),
-                proc.getUser()
+                proc.getUser(),
+                proc.getCommandLine()
         )).collect(Collectors.toList());
     }
+
 
     private List<ProcessInfo> getSuperAppProcesses() {
         List<ProcessInfo> processes = getAllProcesses();
