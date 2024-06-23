@@ -11,6 +11,7 @@ public class TerminalApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        System.out.println("TerminalApp: start() method called");
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Terminal.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
@@ -19,9 +20,11 @@ public class TerminalApp extends Application {
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/superapp/kr_superapp/icons/Terminal.png")));
         primaryStage.setScene(scene);
         primaryStage.show();
+        System.out.println("TerminalApp: Stage shown");
     }
 
     public static void main(String[] args) {
+        System.out.println("TerminalApp: main() method called with args: " + String.join(", ", args));
         launch(args);
     }
 }
