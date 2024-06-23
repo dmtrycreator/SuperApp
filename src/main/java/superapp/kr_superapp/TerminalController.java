@@ -144,7 +144,7 @@ public class TerminalController {
         try {
             // Проверяем, если команда "help", выводим справку по командам
             if (command.equals("help")) {
-                Platform.runLater(() -> updateLabels(command, getHelpMessage(), new Date(), false));
+                updateLabels(command, getHelpMessage(), new Date(), false);
                 removeTips(); // Удаляем подсказки при выводе справки
                 return;
             }
@@ -176,10 +176,8 @@ public class TerminalController {
             int exitCode = process.waitFor();
             if (exitCode == 0) {
                 Date endTime = new Date();
-                Platform.runLater(() -> {
-                    updateLabels(command, resultBuilder.toString(), endTime, true);
-                    removeTips();
-                });
+                updateLabels(command, resultBuilder.toString(), endTime, true);
+                removeTips();
                 writeToFile(resultBuilder.toString());
             } else {
                 System.err.println("Ошибка выполнения команды: " + command);
@@ -209,7 +207,7 @@ public class TerminalController {
             if (newDir.exists() && newDir.isDirectory()) {
                 currentDirectory = newDir.getAbsolutePath();
             } else {
-                Platform.runLater(() -> updateLabels(command, "No such directory: " + newDir.getAbsolutePath(), new Date(), false));
+                updateLabels(command, "No such directory: " + newDir.getAbsolutePath(), new Date(), false);
                 return;
             }
         }
@@ -251,7 +249,7 @@ public class TerminalController {
         resultTextFlow.setPadding(new Insets(0, 26, 0, 26));
 
         commandEntry.getChildren().add(resultTextFlow);
-        Platform.runLater(() -> pastCommand.getChildren().add(commandEntry));
+        pastCommand.getChildren().add(commandEntry);
 
         Line separatorLine = new Line();
         separatorLine.setStartX(0);
@@ -260,33 +258,30 @@ public class TerminalController {
         separatorLine.setStrokeWidth(3);
         commandEntry.getChildren().add(separatorLine);
 
-        commandEntry.setUserData(resultTextFlow);
-        commandEntry.setUserData(timeLabel);
+        commandEntry.setUserData(new Object[]{resultTextFlow, timeLabel});
 
         return commandEntry;
     }
 
     private void updateResultText(VBox commandEntry, String result) {
-        Platform.runLater(() -> {
-            TextFlow resultTextFlow = (TextFlow) commandEntry.getUserData();
-            Text resultText = new Text(result + "\n");
-            resultText.setFill(Color.web("#83888b"));
-            resultTextFlow.getChildren().add(resultText);
-        });
+        Object[] userData = (Object[]) commandEntry.getUserData();
+        TextFlow resultTextFlow = (TextFlow) userData[0];
+        Text resultText = new Text(result + "\n");
+        resultText.setFill(Color.web("#83888b"));
+        resultTextFlow.getChildren().add(resultText);
     }
 
     private void updateLabels(String command, String result, Date executionStartTime, boolean updateTime) {
-        Platform.runLater(() -> {
-            VBox commandEntry = createCommandEntry(command, executionStartTime);
-            updateResultText(commandEntry, result);
+        VBox commandEntry = createCommandEntry(command, executionStartTime);
+        updateResultText(commandEntry, result);
 
-            if (updateTime) {
-                Date executionEndTime = new Date();
-                long executionTime = executionEndTime.getTime() - executionStartTime.getTime();
-                Label timeLabel = (Label) commandEntry.getUserData();
-                timeLabel.setText("(" + executionTime + " ms)");
-            }
-        });
+        if (updateTime) {
+            Date executionEndTime = new Date();
+            long executionTime = executionEndTime.getTime() - executionStartTime.getTime();
+            Object[] userData = (Object[]) commandEntry.getUserData();
+            Label timeLabel = (Label) userData[1];
+            timeLabel.setText("(" + executionTime + " ms)");
+        }
     }
 
     private void removeTips() {
