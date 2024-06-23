@@ -4,7 +4,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.control.FileChooser;
+import javafx.stage.FileChooser;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
@@ -405,7 +405,7 @@ public class TerminalController {
         }
         fileChooser.setInitialDirectory(initialDirectory);
 
-        File file = fileChooser.showSaveDialog(stackMain.getScene().getWindow());
+        File file = fileChooser.showSaveDialog(TerminalV.getScene().getWindow());
         if (file != null) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
                 writer.write(logBuilder.toString());
