@@ -378,7 +378,7 @@ public class TerminalController {
                     "--",
                     "/bin/bash",
                     "--rcfile",
-                    System.getProperty("user.home") + "/.superapp/scripts/custom_bashrc"
+                    System.getProperty("user.home") + "/SuperApp/scripts/custom_bashrc"
             );
             pb.start();
         } catch (IOException e) {
