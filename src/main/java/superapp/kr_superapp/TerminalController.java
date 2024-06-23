@@ -141,77 +141,81 @@ public class TerminalController {
     }
 
     public void executeCommand(String command) {
-        try {
-            // Проверяем, если команда "help", выводим справку по командам
-            if (command.equals("help")) {
-                updateLabels(command, getHelpMessage(), new Date(), false);
-                removeTips(); // Удаляем подсказки при выводе справки
-                return;
+        Platform.runLater(() -> {
+            try {
+                // Проверяем, если команда "help", выводим справку по командам
+                if (command.equals("help")) {
+                    updateLabels(command, getHelpMessage(), new Date(), false);
+                    removeTips(); // Удаляем подсказки при выводе справки
+                    return;
+                }
+
+                // Обрабатываем команду cd отдельно для изменения директории
+                if (command.startsWith("cd")) {
+                    changeDirectory(command);
+                    return;
+                }
+
+                // Создаем процесс для выполнения команды в текущей директории
+                ProcessBuilder builder = new ProcessBuilder("bash", "-c", command);
+                builder.directory(new File(currentDirectory));
+                builder.redirectErrorStream(true); // Перенаправляем stderr в stdout
+                Process process = builder.start();
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line;
+                StringBuilder resultBuilder = new StringBuilder();
+                Date startTime = new Date();
+                VBox commandEntry = createCommandEntry(command, startTime);
+
+                while ((line = reader.readLine()) != null) {
+                    String finalLine = line;
+                    resultBuilder.append(line).append("\n");
+                    Platform.runLater(() -> updateResultText(commandEntry, finalLine));
+                }
+
+                int exitCode = process.waitFor();
+                if (exitCode == 0) {
+                    Date endTime = new Date();
+                    updateLabels(command, resultBuilder.toString(), endTime, true);
+                    removeTips();
+                    writeToFile(resultBuilder.toString());
+                } else {
+                    System.err.println("Ошибка выполнения команды: " + command);
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
             }
-
-            // Обрабатываем команду cd отдельно для изменения директории
-            if (command.startsWith("cd")) {
-                changeDirectory(command);
-                return;
-            }
-
-            // Создаем процесс для выполнения команды в текущей директории
-            ProcessBuilder builder = new ProcessBuilder("bash", "-c", command);
-            builder.directory(new File(currentDirectory));
-            builder.redirectErrorStream(true); // Перенаправляем stderr в stdout
-            Process process = builder.start();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            StringBuilder resultBuilder = new StringBuilder();
-            Date startTime = new Date();
-            VBox commandEntry = createCommandEntry(command, startTime);
-
-            while ((line = reader.readLine()) != null) {
-                String finalLine = line;
-                resultBuilder.append(line).append("\n");
-                Platform.runLater(() -> updateResultText(commandEntry, finalLine));
-            }
-
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                Date endTime = new Date();
-                updateLabels(command, resultBuilder.toString(), endTime, true);
-                removeTips();
-                writeToFile(resultBuilder.toString());
-            } else {
-                System.err.println("Ошибка выполнения команды: " + command);
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        updatePathLabel();
+            updatePathLabel();
+        });
     }
 
     private void changeDirectory(String command) {
-        String[] parts = command.split(" ", 2); // Разделяем команду только на два элемента, чтобы поддерживать пути с пробелами
-        if (parts.length < 2 || parts[1].equals("~")) {
-            currentDirectory = System.getProperty("user.home");
-        } else if (parts[1].equals("-")) {
-            // Implement switching to previous directory if needed
-        } else {
-            File newDir;
-            if (parts[1].startsWith("/")) {
-                // Если путь абсолютный, используем его напрямую
-                newDir = new File(parts[1]);
+        Platform.runLater(() -> {
+            String[] parts = command.split(" ", 2); // Разделяем команду только на два элемента, чтобы поддерживать пути с пробелами
+            if (parts.length < 2 || parts[1].equals("~")) {
+                currentDirectory = System.getProperty("user.home");
+            } else if (parts[1].equals("-")) {
+                // Implement switching to previous directory if needed
             } else {
-                // Если путь относительный, создаем его относительно текущей директории
-                newDir = new File(currentDirectory, parts[1]);
-            }
+                File newDir;
+                if (parts[1].startsWith("/")) {
+                    // Если путь абсолютный, используем его напрямую
+                    newDir = new File(parts[1]);
+                } else {
+                    // Если путь относительный, создаем его относительно текущей директории
+                    newDir = new File(currentDirectory, parts[1]);
+                }
 
-            if (newDir.exists() && newDir.isDirectory()) {
-                currentDirectory = newDir.getAbsolutePath();
-            } else {
-                updateLabels(command, "No such directory: " + newDir.getAbsolutePath(), new Date(), false);
-                return;
+                if (newDir.exists() && newDir.isDirectory()) {
+                    currentDirectory = newDir.getAbsolutePath();
+                } else {
+                    updateLabels(command, "No such directory: " + newDir.getAbsolutePath(), new Date(), false);
+                    return;
+                }
             }
-        }
-        updatePathLabel();
+            updatePathLabel();
+        });
     }
 
     private void updatePathLabel() {
@@ -249,7 +253,7 @@ public class TerminalController {
         resultTextFlow.setPadding(new Insets(0, 26, 0, 26));
 
         commandEntry.getChildren().add(resultTextFlow);
-        pastCommand.getChildren().add(commandEntry);
+        Platform.runLater(() -> pastCommand.getChildren().add(commandEntry));
 
         Line separatorLine = new Line();
         separatorLine.setStartX(0);
@@ -264,11 +268,13 @@ public class TerminalController {
     }
 
     private void updateResultText(VBox commandEntry, String result) {
-        Object[] userData = (Object[]) commandEntry.getUserData();
-        TextFlow resultTextFlow = (TextFlow) userData[0];
-        Text resultText = new Text(result + "\n");
-        resultText.setFill(Color.web("#83888b"));
-        resultTextFlow.getChildren().add(resultText);
+        Platform.runLater(() -> {
+            Object[] userData = (Object[]) commandEntry.getUserData();
+            TextFlow resultTextFlow = (TextFlow) userData[0];
+            Text resultText = new Text(result + "\n");
+            resultText.setFill(Color.web("#83888b"));
+            resultTextFlow.getChildren().add(resultText);
+        });
     }
 
     private void updateLabels(String command, String result, Date executionStartTime, boolean updateTime) {
