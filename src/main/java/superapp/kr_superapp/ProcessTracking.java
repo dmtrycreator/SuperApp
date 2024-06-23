@@ -196,7 +196,7 @@ public class ProcessTracking {
     }
 
     private boolean isSuperAppProcess(ProcessInfo process) {
-        return process.getExecutablePath().contains("SuperApp");
+        return process.getCommandLine().contains("SuperApp") || process.getExecutablePath().contains("SuperApp");
     }
 
     private List<ProcessInfo> getAllProcesses() {
@@ -216,10 +216,9 @@ public class ProcessTracking {
                 proc.getStartTime(),
                 proc.getPath(),
                 proc.getUser(),
-                proc.getCommandLine()
+                String.join(" ", proc.getArguments()) // Получение командной строки
         )).collect(Collectors.toList());
     }
-
 
     private List<ProcessInfo> getSuperAppProcesses() {
         List<ProcessInfo> processes = getAllProcesses();
