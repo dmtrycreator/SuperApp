@@ -46,48 +46,47 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 
 public class ProcessTracking {
 
-@FXML
-private TableView<ProcessInfo> processTrackingTableView;
+    @FXML
+    private RadioMenuItem actProcessesMenuItem;
 
-@FXML
-private ComboBox<String> processFilterComboBox;
+    @FXML
+    private RadioMenuItem allProcessesMenuItem;
 
-@FXML
-private MenuItem menu_item_report;
+    @FXML
+    private RadioMenuItem superAppProcessesMenuItem;
 
-@FXML
-private Label statusLabel;
+    @FXML
+    private VBox main_vbox;
 
-@FXML
-private RadioMenuItem actProcessesMenuItem;
+    @FXML
+    private MenuItem menu_item_report;
 
-@FXML
-private RadioMenuItem allProcessesMenuItem;
+    @FXML
+    private TableView<ProcessInfo> processTrackingTableView;
 
-@FXML
-private VBox main_vbox;
+    @FXML
+    private MenuItem resourseMenuItem;
 
-@FXML
-private MenuItem resourseMenuItem;
+    @FXML
+    private Button restartButton;
 
-@FXML
-private Button restartButton;
+    @FXML
+    private MenuItem searchMenuItem;
 
-@FXML
-private MenuItem searchMenuItem;
+    @FXML
+    private MenuBar settingsMenu;
 
-@FXML
-private MenuItem settingsMenuItem;
+    @FXML
+    private MenuItem settingsMenuItem;
 
-@FXML
-private MenuBar settingsMenu;
+    @FXML
+    private StackPane stackMain;
 
-@FXML
-private StackPane stackMain;
-
+    @FXML
+    private Label statusLabel;
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private long updateInterval = 5; // Update interval in seconds, can be adjusted in settings
+    private long updateInterval = 5; // Интервал обновления в секундах, можно настроить в настройках
 
     private SystemMonitor systemMonitor = new SystemMonitor();
     private long previousBytesReceived = 0;
@@ -96,24 +95,20 @@ private StackPane stackMain;
 
     private StringBuilder logBuilder = new StringBuilder();
 
+    private ObservableList<ProcessInfo> processList;
+
     public void initialize() {
         initializeTableColumns();
-        updateProcessTable();
-
-        allProcessesMenuItem.setOnAction(event -> showAllProcesses());
-        actProcessesMenuItem.setOnAction(event -> showActiveProcesses());
-        superAppProcessesMenuItem.setOnAction(event -> showSuperAppProcesses());
-
-        actProcessesMenuItem.setSelected(true);
+        setDefaultSelection();
+        addRadioButtonsHandlers();
+        startProcessUpdateScheduler();
 
         addContextMenu();
-        startProcessUpdateScheduler();
+        setupKeyShortcuts();
 
         settingsMenuItem.setOnAction(event -> openSettingsOverlay());
         searchMenuItem.setOnAction(event -> openSearchOverlay());
         resourseMenuItem.setOnAction(event -> openResourceMonitorOverlay());
-
-        setupKeyShortcuts();
 
         menu_item_report.setOnAction(event -> saveLogReport());
     }
@@ -151,11 +146,31 @@ private StackPane stackMain;
         }
     }
 
+    public void setDefaultSelection() {
+        actProcessesMenuItem.setSelected(true);
+        updateProcessTable();
+    }
+
+    private void addRadioButtonsHandlers() {
+        allProcessesMenuItem.setOnAction(event -> showAllProcesses());
+        actProcessesMenuItem.setOnAction(event -> showActiveProcesses());
+        superAppProcessesMenuItem.setOnAction(event -> showSuperAppProcesses());
+    }
+
     private void initializeTableColumns() {
-    pidColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getPid()));
-    nameColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getName()));
-    cpuUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getCpuUsage() * 100.0) / 100.0));
-memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getMemoryUsage())));
+        TableColumn<ProcessInfo, Integer> pidColumn = new TableColumn<>("PID");
+        pidColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getPid()));
+
+        TableColumn<ProcessInfo, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getName()));
+
+        TableColumn<ProcessInfo, Double> cpuUsageColumn = new TableColumn<>("CPU Usage (%)");
+        cpuUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getCpuUsage() * 100.0) / 100.0));
+
+        TableColumn<ProcessInfo, Long> memoryUsageColumn = new TableColumn<>("Memory Usage (MB)");
+        memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getMemoryUsage())));
+
+        processTrackingTableView.getColumns().addAll(pidColumn, nameColumn, cpuUsageColumn, memoryUsageColumn);
     }
 
     private void updateProcessTable() {
@@ -206,11 +221,9 @@ memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.r
         try {
             FileMappingHandler fileMappingHandler = new FileMappingHandler();
             byte[] data = fileMappingHandler.readData();
-            String[] processNames = new String(data).trim().split(",");
-
-            List<ProcessInfo> processes = getAllProcesses();
-            return processes.stream()
-                    .filter(process -> Arrays.asList(processNames).contains(process.getName()))
+            String[] pids = new String(data).trim().split(",");
+            return getAllProcesses().stream()
+                    .filter(process -> containsPid(pids, process.getPid()))
                     .collect(Collectors.toList());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -219,21 +232,30 @@ memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.r
         }
     }
 
+    private boolean containsPid(String[] pids, int pid) {
+        for (String p : pids) {
+            if (Integer.parseInt(p) == pid) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void showAllProcesses() {
         processList = FXCollections.observableArrayList(getAllProcesses());
         processTrackingTableView.setItems(processList);
     }
 
     private void showActiveProcesses() {
-        List<ProcessInfo> activeProcesses = processList.stream()
+        List<ProcessInfo> activeProcesses = getAllProcesses().stream()
                 .filter(process -> process.getCpuUsage() > 0)
                 .collect(Collectors.toList());
         processTrackingTableView.setItems(FXCollections.observableArrayList(activeProcesses));
     }
 
     private void showSuperAppProcesses() {
-        List<ProcessInfo> superAppProcesses = getSuperAppProcesses();
-        processTrackingTableView.setItems(FXCollections.observableArrayList(superAppProcesses));
+        processList = FXCollections.observableArrayList(getSuperAppProcesses());
+        processTrackingTableView.setItems(processList);
     }
 
     private String getSelectedFilter() {
@@ -350,7 +372,6 @@ memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.r
     }
 
     private void startProcessUpdateScheduler() {
-        scheduler = Executors.newScheduledThreadPool(1);
         Runnable updateTask = () -> Platform.runLater(this::updateProcessTable);
         scheduler.scheduleAtFixedRate(updateTask, 0, updateInterval, TimeUnit.SECONDS);
     }
