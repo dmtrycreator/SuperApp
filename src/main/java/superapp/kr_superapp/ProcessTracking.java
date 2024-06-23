@@ -128,6 +128,40 @@ public class ProcessTracking {
         menu_item_report.setOnAction(event -> saveLogReport());
     }
 
+    
+    private void setupKeyShortcuts() {
+        processTrackingTableView.setOnKeyPressed(event -> {
+            if (event.isControlDown()) {
+                switch (event.getCode()) {
+                    case P:
+                        executeForSelectedProcess(this::openProcessInfoWindow);
+                        break;
+                    case S:
+                        executeForSelectedProcess(this::interruptProcess);
+                        break;
+                    case C:
+                        executeForSelectedProcess(this::continueProcess);
+                        break;
+                    case T:
+                        executeForSelectedProcess(this::terminateProcess);
+                        break;
+                    case I:
+                        executeForSelectedProcess(this::interruptProcess);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+    }
+
+    private void executeForSelectedProcess(java.util.function.Consumer<ProcessInfo> action) {
+        ProcessInfo selectedProcess = processTrackingTableView.getSelectionModel().getSelectedItem();
+        if (selectedProcess != null) {
+            action.accept(selectedProcess);
+        }
+    }
+
     public void setDefaultSelection() {
         actProcessesMenuItem.setSelected(true);
         updateProcessTable();
