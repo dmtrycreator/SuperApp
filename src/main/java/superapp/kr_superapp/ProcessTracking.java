@@ -30,14 +30,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Comparator;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.Arrays;
 
 import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
@@ -241,15 +238,15 @@ public class ProcessTracking {
     }
 
     private void showActiveProcesses() {
-        String currentProcessName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
-        String currentPid = currentProcessName.split("@")[0];
+        List<Integer> superAppPIDs = getSuperAppPIDs();
 
         List<ProcessInfo> activeProcesses = getAllProcesses().stream()
-                .filter(process -> process.getCpuUsage() > 0 && !String.valueOf(process.getPid()).equals(currentPid))
+                .filter(process -> process.getCpuUsage() > 0 && !superAppPIDs.contains(process.getPid()))
                 .collect(Collectors.toList());
 
         processTrackingTableView.setItems(FXCollections.observableArrayList(activeProcesses));
     }
+
 
 
     private String getSelectedFilter() {
@@ -477,6 +474,23 @@ public class ProcessTracking {
         startProcessUpdateScheduler();
     }
 
+    private List<Integer> getSuperAppPIDs() {
+        String currentProcessName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+        String currentPid = currentProcessName.split("@")[0];
+
+        List<Integer> superAppPIDs = new ArrayList<>();
+        superAppPIDs.add(Integer.parseInt(currentPid));
+
+        // Добавим логику для получения PID всех дочерних процессов
+        List<ProcessHandle> descendants = ProcessHandle.current().descendants().toList();
+        for (ProcessHandle ph : descendants) {
+            superAppPIDs.add((int) ph.pid());
+        }
+
+        return superAppPIDs;
+    }
+
+
     private void openResourceMonitorOverlay() {
         VBox monitorOverlay = new VBox();
         monitorOverlay.setAlignment(Pos.CENTER);
@@ -657,7 +671,13 @@ public class ProcessTracking {
     }
 
     private void showSuperAppProcesses() {
-        ObservableList<ProcessInfo> superAppProcesses = FXCollections.observableArrayList(getSuperAppProcesses());
-        processTrackingTableView.setItems(superAppProcesses);
+        List<Integer> superAppPIDs = getSuperAppPIDs();
+
+        List<ProcessInfo> superAppProcesses = getAllProcesses().stream()
+                .filter(process -> superAppPIDs.contains(process.getPid()))
+                .collect(Collectors.toList());
+
+        processTrackingTableView.setItems(FXCollections.observableArrayList(superAppProcesses));
     }
+
 }
