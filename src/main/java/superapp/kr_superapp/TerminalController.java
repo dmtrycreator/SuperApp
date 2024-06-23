@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.FileChooser;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
@@ -21,6 +22,7 @@ import java.net.URL;
 import java.nio.BufferOverflowException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.concurrent.Semaphore;
@@ -101,6 +103,8 @@ public class TerminalController {
     private String currentDirectory;
     private String userName;
 
+    private static StringBuilder logBuilder = new StringBuilder();
+
     @FXML
     void initialize() {
         // Инициализируем текущую директорию и имя пользователя
@@ -157,34 +161,28 @@ public class TerminalController {
             builder.redirectErrorStream(true); // Перенаправляем stderr в stdout
             Process process = builder.start();
 
-            // Создаем StringBuilder для хранения результата выполнения команды
-            StringBuilder resultBuilder = new StringBuilder();
-
-            // Читаем вывод команды
+            // Читаем вывод команды и постепенно обновляем интерфейс
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
+                Date executionStartTime = new Date();
+                StringBuilder resultBuilder = new StringBuilder();
                 while ((line = reader.readLine()) != null) {
-                    // Добавляем каждую строку результата в StringBuilder
                     resultBuilder.append(line).append("\n");
+                    String result = resultBuilder.toString();
+                    Platform.runLater(() -> updateLabels(command, result, executionStartTime));
                 }
             }
 
             // Ожидаем завершения выполнения команды
             int exitCode = process.waitFor();
             if (exitCode == 0) {
-                // Если выполнение завершено успешно, обновляем метки
-                Date executionTime = new Date();
-                updateLabels(command, resultBuilder.toString(), executionTime);
-                removeTips();
-
-                // Записываем результат команды в отображаемый файл
-                writeToFile(resultBuilder.toString());
+                log("Команда выполнена успешно: " + command);
             } else {
-                // В случае ошибки выводим сообщение об ошибке
-                System.err.println("Ошибка выполнения команды: " + command);
+                log("Ошибка выполнения команды: " + command);
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+            log("Ошибка при выполнении команды: " + e.getMessage());
         }
 
         // Обновляем текущий путь после выполнения команды
@@ -383,6 +381,63 @@ public class TerminalController {
             pb.start();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Логирует сообщение с отметкой времени.
+     *
+     * @param message сообщение для логирования / message to log
+     */
+    public static void log(String message) {
+        logBuilder.append(LocalTime.now()).append(" - ").append(message).append("\n");
+    }
+
+    private void saveLogReport() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Сохранить отчет журнала");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "*.log"));
+        fileChooser.setInitialFileName("log.log");
+
+        File initialDirectory = new File("src/main/log");
+        if (!initialDirectory.exists()) {
+            initialDirectory.mkdirs();
+        }
+        fileChooser.setInitialDirectory(initialDirectory);
+
+        File file = fileChooser.showSaveDialog(stackMain.getScene().getWindow());
+        if (file != null) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                writer.write(logBuilder.toString());
+                log("Отчет журнала сохранен в: " + file.getAbsolutePath());
+                setStatusMessage("Отчет журнала сохранен");
+
+                // Устанавливаем файл в режим только для чтения
+                if (file.setReadOnly()) {
+                    log("Файл установлен в режим только для чтения");
+                } else {
+                    log("Не удалось установить файл в режим только для чтения");
+                }
+            } catch (IOException e) {
+                log("Ошибка сохранения отчета журнала: " + e.getMessage());
+                setStatusMessage("Ошибка сохранения отчета журнала");
+            }
+        } else {
+            log("Сохранение отчета журнала отменено");
+            setStatusMessage("Сохранение отчета журнала отменено");
+        }
+    }
+
+    /**
+     * Устанавливает сообщение статуса в интерфейсе.
+     *
+     * @param message Сообщение для установки.
+     */
+    public void setStatusMessage(String message) {
+        if (statusLabel != null) {
+            statusLabel.setText(message);
+        } else {
+            System.err.println("statusLabel is not initialized");
         }
     }
 }
