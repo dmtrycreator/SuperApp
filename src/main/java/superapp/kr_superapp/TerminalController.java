@@ -4,7 +4,6 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.stage.FileChooser;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
@@ -16,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
 
 import java.io.*;
 import java.net.URL;
@@ -144,7 +144,7 @@ public class TerminalController {
         try {
             // Проверяем, если команда "help", выводим справку по командам
             if (command.equals("help")) {
-                updateLabels(command, getHelpMessage(), new Date());
+                updateLabels(command, getHelpMessage(), new Date(), false);
                 removeTips(); // Удаляем подсказки при выводе справки
                 return;
             }
@@ -161,31 +161,30 @@ public class TerminalController {
             builder.redirectErrorStream(true); // Перенаправляем stderr в stdout
             Process process = builder.start();
 
-            // Читаем вывод команды и постепенно обновляем интерфейс
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                Date executionStartTime = new Date();
-                StringBuilder resultBuilder = new StringBuilder();
-                while ((line = reader.readLine()) != null) {
-                    resultBuilder.append(line).append("\n");
-                    String result = resultBuilder.toString();
-                    Platform.runLater(() -> updateLabels(command, result, executionStartTime));
-                }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            StringBuilder resultBuilder = new StringBuilder();
+            Date startTime = new Date();
+            VBox commandEntry = createCommandEntry(command, startTime);
+
+            while ((line = reader.readLine()) != null) {
+                String finalLine = line;
+                resultBuilder.append(line).append("\n");
+                Platform.runLater(() -> updateResultText(commandEntry, finalLine));
             }
 
-            // Ожидаем завершения выполнения команды
             int exitCode = process.waitFor();
             if (exitCode == 0) {
-                log("Команда выполнена успешно: " + command);
+                Date endTime = new Date();
+                updateLabels(command, resultBuilder.toString(), endTime, true);
+                removeTips();
+                writeToFile(resultBuilder.toString());
             } else {
-                log("Ошибка выполнения команды: " + command);
+                System.err.println("Ошибка выполнения команды: " + command);
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            log("Ошибка при выполнении команды: " + e.getMessage());
         }
-
-        // Обновляем текущий путь после выполнения команды
         updatePathLabel();
     }
 
@@ -208,7 +207,7 @@ public class TerminalController {
             if (newDir.exists() && newDir.isDirectory()) {
                 currentDirectory = newDir.getAbsolutePath();
             } else {
-                updateLabels(command, "No such directory: " + newDir.getAbsolutePath(), new Date());
+                updateLabels(command, "No such directory: " + newDir.getAbsolutePath(), new Date(), false);
                 return;
             }
         }
@@ -216,77 +215,77 @@ public class TerminalController {
     }
 
     private void updatePathLabel() {
-        pathLabel.setText(userName + ":" + currentDirectory + "$");
+        Platform.runLater(() -> pathLabel.setText(userName + ":" + currentDirectory + "$"));
     }
 
-    // Метод для обновления меток результатов и времени выполнения
-    private void updateLabels(String command, String result, Date executionStartTime) {
-        Platform.runLater(() -> {
-            // Создаем новую запись команды
-            VBox commandEntry = new VBox();
-            commandEntry.setSpacing(10.0);
-            commandEntry.setPadding(new Insets(0, 26, 0, 0)); // Добавляем отступ слева
+    private VBox createCommandEntry(String command, Date executionStartTime) {
+        VBox commandEntry = new VBox();
+        commandEntry.setSpacing(10.0);
+        commandEntry.setPadding(new Insets(0, 26, 0, 0));
 
-            // Создаем HBox для текста с пользователем и директорией
-            HBox userTimeBox = new HBox();
-            userTimeBox.setSpacing(20);
-            userTimeBox.setPadding(new Insets(0, 26, 0, 26));
+        HBox userTimeBox = new HBox();
+        userTimeBox.setSpacing(20);
+        userTimeBox.setPadding(new Insets(0, 26, 0, 26));
 
-            // Создаем метку текста с пользователем и директорией
-            Label userLabel = new Label(userName + " ~ Terminal File Manager");
-            userLabel.setStyle("-fx-opacity: 0.6; -fx-text-fill: #469ee9; -fx-font-family: Inter Medium; -fx-font-size: 16;");
-            userTimeBox.getChildren().add(userLabel);
+        Label userLabel = new Label(userName + " ~ Terminal File Manager");
+        userLabel.setStyle("-fx-opacity: 0.6; -fx-text-fill: #469ee9; -fx-font-family: Inter Medium; -fx-font-size: 16;");
+        userTimeBox.getChildren().add(userLabel);
 
-            // Вычисляем время выполнения команды
+        Label timeLabel = new Label();
+        timeLabel.setStyle("-fx-opacity: 0.4; -fx-text-fill: #83888b;");
+        userTimeBox.getChildren().add(timeLabel);
+
+        commandEntry.getChildren().add(userTimeBox);
+
+        Label commandLabel = new Label(command);
+        commandLabel.setStyle("-fx-text-fill: #83888b; -fx-font-family: Ubuntu Mono; -fx-font-size: 16; -fx-opacity: 0.6;");
+        commandLabel.setPadding(new Insets(0, 26, 0, 26));
+        commandEntry.getChildren().add(commandLabel);
+
+        TextFlow resultTextFlow = new TextFlow();
+        resultTextFlow.setPrefWidth(888.0);
+        resultTextFlow.setStyle("-fx-font-family: Ubuntu Mono; -fx-font-size: 16;");
+        resultTextFlow.setLineSpacing(5.0);
+        resultTextFlow.setPadding(new Insets(0, 26, 0, 26));
+
+        commandEntry.getChildren().add(resultTextFlow);
+        pastCommand.getChildren().add(commandEntry);
+
+        Line separatorLine = new Line();
+        separatorLine.setStartX(0);
+        separatorLine.setEndX(940);
+        separatorLine.setStroke(Color.web("#1E1E1E"));
+        separatorLine.setStrokeWidth(3);
+        commandEntry.getChildren().add(separatorLine);
+
+        commandEntry.setUserData(resultTextFlow);
+        commandEntry.setUserData(timeLabel);
+
+        return commandEntry;
+    }
+
+    private void updateResultText(VBox commandEntry, String result) {
+        TextFlow resultTextFlow = (TextFlow) commandEntry.getUserData();
+        Text resultText = new Text(result + "\n");
+        resultText.setFill(Color.web("#83888b"));
+        resultTextFlow.getChildren().add(resultText);
+    }
+
+    private void updateLabels(String command, String result, Date executionStartTime, boolean updateTime) {
+        VBox commandEntry = createCommandEntry(command, executionStartTime);
+        updateResultText(commandEntry, result);
+
+        if (updateTime) {
             Date executionEndTime = new Date();
             long executionTime = executionEndTime.getTime() - executionStartTime.getTime();
-
-            // Создаем и настраиваем время выполнения команды
-            Label timeLabel = new Label("(" + executionTime + " ms)");
-            timeLabel.setStyle("-fx-opacity: 0.4; -fx-text-fill: #83888b;");
-            userTimeBox.getChildren().add(timeLabel);
-
-            // Добавляем HBox в запись команды
-            commandEntry.getChildren().add(userTimeBox);
-
-            // Создаем и настраиваем название команды
-            Label commandLabel = new Label(command);
-            commandLabel.setStyle("-fx-text-fill: #83888b; -fx-font-family: Ubuntu Mono; -fx-font-size: 16; -fx-opacity: 0.6;"); // Устанавливаем прозрачность в 0.6
-            commandLabel.setPadding(new Insets(0, 26, 0, 26));
-            commandEntry.getChildren().add(commandLabel);
-
-            TextFlow resultTextFlow = new TextFlow();
-            resultTextFlow.setPrefWidth(888.0); // Ширина может быть фиксированной
-            resultTextFlow.setStyle("-fx-font-family: Ubuntu Mono; -fx-font-size: 16;");
-            resultTextFlow.setLineSpacing(5.0); // Устанавливаем промежуток между строками
-            resultTextFlow.setPadding(new Insets(0, 26, 0, 26)); // Уменьшаем отступ сверху до 5 пикселей
-
-            // Создаем текст для отображения в TextFlow
-            Text resultText = new Text(result);
-            resultText.setFill(Color.web("#83888b")); // Задаем цвет текста
-
-            // Добавляем текст в TextFlow
-            resultTextFlow.getChildren().add(resultText);
-            resultTextFlow.setPadding(new Insets(0, 26, 0, 26));
-            commandEntry.getChildren().add(resultTextFlow);
-
-            // Добавляем созданную запись команды в конец списка предыдущих записей
-            pastCommand.getChildren().add(commandEntry);
-
-            // Создаем и добавляем линию-разделитель
-            Line separatorLine = new Line();
-            separatorLine.setStartX(0);
-            separatorLine.setEndX(940);
-            separatorLine.setStroke(Color.web("#1E1E1E")); // Задаем цвет линии
-            separatorLine.setStrokeWidth(3); // Задаем толщину линии
-            commandEntry.getChildren().add(separatorLine);
-        });
+            Label timeLabel = (Label) commandEntry.getUserData();
+            timeLabel.setText("(" + executionTime + " ms)");
+        }
     }
 
-    // Метод для удаления подсказок
     private void removeTips() {
-        Platform.runLater(() -> {
-            if (!tipsRemoved) {
+        if (!tipsRemoved) {
+            Platform.runLater(() -> {
                 if (terminalVBox.getChildren().contains(tipOneHBox)) {
                     terminalVBox.getChildren().remove(tipOneHBox);
                 }
@@ -296,12 +295,11 @@ public class TerminalController {
                 if (terminalVBox.getChildren().contains(tipThreeHBox)) {
                     terminalVBox.getChildren().remove(tipThreeHBox);
                 }
-                tipsRemoved = true; // Устанавливаем флаг, чтобы избежать повторного удаления
-            }
-        });
+                tipsRemoved = true;
+            });
+        }
     }
 
-    // Метод для записи данных в файл отображения
     private void writeToFile(String data) {
         byte[] bytes = data.getBytes();
         if (bytes.length > FILE_SIZE) {
@@ -309,24 +307,23 @@ public class TerminalController {
         }
         try (RandomAccessFile file = new RandomAccessFile(FILE_PATH, "rw");
              FileChannel fileChannel = file.getChannel()) {
-            semaphore.acquire(); // Захватываем семафор для синхронизации
+            semaphore.acquire();
             MappedByteBuffer buffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, FILE_SIZE);
-            buffer.put(bytes); // Записываем данные в файл
-            semaphore.release(); // Освобождаем семафор
+            buffer.put(bytes);
+            semaphore.release();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    // Метод для чтения данных из файла отображения (может быть использован другим процессом)
     private String readFromFile() {
         try (RandomAccessFile file = new RandomAccessFile(FILE_PATH, "r");
              FileChannel fileChannel = file.getChannel()) {
-            semaphore.acquire(); // Захватываем семафор для синхронизации
+            semaphore.acquire();
             MappedByteBuffer buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, FILE_SIZE);
             byte[] data = new byte[buffer.remaining()];
-            buffer.get(data); // Читаем данные из файла
-            semaphore.release(); // Освобождаем семафор
+            buffer.get(data);
+            semaphore.release();
             return new String(data).trim();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -334,7 +331,6 @@ public class TerminalController {
         return "";
     }
 
-    // Метод для получения справки по командам
     private String getHelpMessage() {
         return """
                 Доступные команды:
@@ -369,7 +365,7 @@ public class TerminalController {
 
     @FXML
     private void handleTerminalShortcut() {
-        statusLabel.setText("Клавиши нажаты"); // Подтверждение нажатия клавиш
+        statusLabel.setText("Клавиши нажаты");
         try {
             ProcessBuilder pb = new ProcessBuilder(
                     "gnome-terminal",
@@ -384,11 +380,6 @@ public class TerminalController {
         }
     }
 
-    /**
-     * Логирует сообщение с отметкой времени.
-     *
-     * @param message сообщение для логирования / message to log
-     */
     public static void log(String message) {
         logBuilder.append(LocalTime.now()).append(" - ").append(message).append("\n");
     }
@@ -412,7 +403,6 @@ public class TerminalController {
                 log("Отчет журнала сохранен в: " + file.getAbsolutePath());
                 setStatusMessage("Отчет журнала сохранен");
 
-                // Устанавливаем файл в режим только для чтения
                 if (file.setReadOnly()) {
                     log("Файл установлен в режим только для чтения");
                 } else {
@@ -428,16 +418,13 @@ public class TerminalController {
         }
     }
 
-    /**
-     * Устанавливает сообщение статуса в интерфейсе.
-     *
-     * @param message Сообщение для установки.
-     */
     public void setStatusMessage(String message) {
-        if (statusLabel != null) {
-            statusLabel.setText(message);
-        } else {
-            System.err.println("statusLabel is not initialized");
-        }
+        Platform.runLater(() -> {
+            if (statusLabel != null) {
+                statusLabel.setText(message);
+            } else {
+                System.err.println("statusLabel is not initialized");
+            }
+        });
     }
 }
