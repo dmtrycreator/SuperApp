@@ -4,8 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.scene.chart.AreaChart;
@@ -26,7 +26,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -99,8 +98,6 @@ public class ProcessTracking {
     private long startTime = System.currentTimeMillis() / 1000;
 
     private StringBuilder logBuilder = new StringBuilder();
-
-    private static final String PROCESS_NAME_PREFIX = "SuperApp";
 
     public void initialize() {
         initializeTableColumns();
@@ -175,7 +172,9 @@ public class ProcessTracking {
             List<ProcessInfo> processes = getAllProcesses();
             switch (getSelectedFilter()) {
                 case "active":
-                    processes = processes.stream().filter(process -> process.getCpuUsage() > 0 && !getSuperAppPIDs().contains(process.getPid())).collect(Collectors.toList());
+                    processes = processes.stream()
+                            .filter(process -> process.getCpuUsage() > 0 && !isSuperAppProcess(process))
+                            .collect(Collectors.toList());
                     break;
                 case "superApp":
                     processes = getSuperAppProcesses();
@@ -196,19 +195,8 @@ public class ProcessTracking {
         });
     }
 
-    private List<Integer> getSuperAppPIDs() {
-        String currentProcessName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
-        String currentPid = currentProcessName.split("@")[0];
-
-        List<Integer> superAppPIDs = new ArrayList<>();
-        superAppPIDs.add(Integer.parseInt(currentPid));
-
-        List<ProcessHandle> descendants = ProcessHandle.current().descendants().toList();
-        for (ProcessHandle ph : descendants) {
-            superAppPIDs.add((int) ph.pid());
-        }
-
-        return superAppPIDs;
+    private boolean isSuperAppProcess(ProcessInfo process) {
+        return process.getExecutablePath().contains("SuperApp");
     }
 
     private List<ProcessInfo> getAllProcesses() {
@@ -218,55 +206,23 @@ public class ProcessTracking {
 
         processes.sort(Comparator.comparingDouble(OSProcess::getProcessCpuLoadCumulative).reversed());
 
-        return processes.stream().map(proc -> {
-            String name = proc.getName();
-            int pid = proc.getProcessID();
-            // Check if the process is a superApp process and update its name if necessary
-            if (isSuperAppProcess(pid)) {
-                name = getSuperAppProcessName(pid);
-            }
-            return new ProcessInfo(
-                    pid,
-                    name,
-                    Math.round(100d * (proc.getKernelTime() + proc.getUserTime()) / proc.getUpTime() * 100.0) / 100.0,
-                    proc.getResidentSetSize() / (1024 * 1024),
-                    proc.getState().name(),
-                    proc.getPriority(),
-                    proc.getStartTime(),
-                    proc.getPath(),
-                    proc.getUser()
-            );
-        }).collect(Collectors.toList());
-    }
-
-    private boolean isSuperAppProcess(int pid) {
-        // Check if the process is a superApp process based on the pid
-        List<Integer> superAppPIDs = getSuperAppPIDs();
-        return superAppPIDs.contains(pid);
-    }
-
-    private String getSuperAppProcessName(int pid) {
-        // Retrieve the name of the superApp process based on the pid
-        // This implementation assumes that the process name is passed as an argument
-        // You can modify this logic based on your requirements
-        String processName = "SuperApp Process";
-        try {
-            List<String> args = Files.readAllLines(Paths.get("/proc/" + pid + "/cmdline"));
-            if (args.size() > 1) {
-                processName = args.get(1);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            log("Ошибка чтения имени процесса: " + e.getMessage());
-        }
-        return processName;
+        return processes.stream().map(proc -> new ProcessInfo(
+                proc.getProcessID(),
+                proc.getName(),
+                Math.round(100d * (proc.getKernelTime() + proc.getUserTime()) / proc.getUpTime() * 100.0) / 100.0,
+                proc.getResidentSetSize() / (1024 * 1024),
+                proc.getState().name(),
+                proc.getPriority(),
+                proc.getStartTime(),
+                proc.getPath(),
+                proc.getUser()
+        )).collect(Collectors.toList());
     }
 
     private List<ProcessInfo> getSuperAppProcesses() {
-        List<Integer> superAppPIDs = getSuperAppPIDs();
         List<ProcessInfo> processes = getAllProcesses();
         return processes.stream()
-                .filter(process -> superAppPIDs.contains(process.getPid()))
+                .filter(this::isSuperAppProcess)
                 .collect(Collectors.toList());
     }
 
@@ -276,9 +232,8 @@ public class ProcessTracking {
     }
 
     private void showActiveProcesses() {
-        List<Integer> superAppPIDs = getSuperAppPIDs();
         List<ProcessInfo> activeProcesses = getAllProcesses().stream()
-                .filter(process -> process.getCpuUsage() > 0 && !superAppPIDs.contains(process.getPid()))
+                .filter(process -> process.getCpuUsage() > 0 && !isSuperAppProcess(process))
                 .collect(Collectors.toList());
 
         processTrackingTableView.setItems(FXCollections.observableArrayList(activeProcesses));
@@ -704,4 +659,3 @@ public class ProcessTracking {
         processTrackingTableView.setItems(superAppProcesses);
     }
 }
-
