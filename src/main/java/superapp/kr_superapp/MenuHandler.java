@@ -36,31 +36,34 @@ public class MenuHandler {
     }
 
     private void openApp(String appClassName, String title) {
-        try {
-            FileMappingHandler fileMappingHandler = new FileMappingHandler();
-            String filePath = new String(fileMappingHandler.readData()).trim();
-            log("Путь к файлу прочитан из общей памяти: " + filePath);
+        new Thread(() -> {
+            try {
+                FileMappingHandler fileMappingHandler = new FileMappingHandler();
+                String filePath = new String(fileMappingHandler.readData()).trim();
+                log("Путь к файлу прочитан из общей памяти: " + filePath);
 
-            String javafxPath = "/opt/javafx/lib";  
+                String javafxPath = "/opt/javafx/lib";
 
-            ProcessBuilder processBuilder = new ProcessBuilder(
-                    "java",
-                    "--module-path", javafxPath,
-                    "--add-modules", "javafx.controls,javafx.fxml",
-                    "-cp", System.getProperty("java.class.path"),
-                    appClassName,
-                    filePath
-            );
+                ProcessBuilder processBuilder = new ProcessBuilder(
+                        "java",
+                        "--module-path", javafxPath,
+                        "--add-modules", "javafx.controls,javafx.fxml",
+                        "-cp", System.getProperty("java.class.path"),
+                        appClassName,
+                        filePath
+                );
 
-            processBuilder.inheritIO(); // Выводим все логи в консоль для отладки
-            Process process = processBuilder.start();
-            int exitCode = process.waitFor();
-            log("Приложение завершилось с кодом: " + exitCode);
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            log("Ошибка чтения из общей памяти или запуска приложения: " + e.getMessage());
-        }
+                processBuilder.inheritIO(); // Выводим все логи в консоль для отладки
+                Process process = processBuilder.start();
+                int exitCode = process.waitFor();
+                log("Приложение завершилось с кодом: " + exitCode);
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                log("Ошибка чтения из общей памяти или запуска приложения: " + e.getMessage());
+            }
+        }).start();
     }
+    
 
     public static void log(String message) {
         Controller.log(message);
