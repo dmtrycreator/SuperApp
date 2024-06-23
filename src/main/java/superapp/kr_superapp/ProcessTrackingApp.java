@@ -24,6 +24,7 @@ public class ProcessTrackingApp extends Application {
 
         ProcessTracking controller = loader.getController();
         controller.initializeWithData(sharedData);
+        controller.setDefaultSelection();
 
         primaryStage.show();
     }
