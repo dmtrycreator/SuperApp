@@ -11,20 +11,19 @@ public class TerminalApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        System.out.println("TerminalApp: start() method called");
+        String processName = getParameters().getUnnamed().size() > 1 ? getParameters().getUnnamed().get(1) : "Terminal Process";
+        
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Terminal.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
-        primaryStage.setTitle("Terminal");
+        primaryStage.setTitle("Терминал");
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/superapp/kr_superapp/icons/Terminal.png")));
         primaryStage.setScene(scene);
         primaryStage.show();
-        System.out.println("TerminalApp: Stage shown");
     }
 
     public static void main(String[] args) {
-        System.out.println("TerminalApp: main() method called with args: " + String.join(", ", args));
         launch(args);
     }
 }
