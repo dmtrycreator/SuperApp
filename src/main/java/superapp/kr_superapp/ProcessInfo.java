@@ -18,8 +18,9 @@ public class ProcessInfo {
     private long startTime;
     private String executablePath;
     private String userName;
+    private String commandLine;
 
-    public ProcessInfo(int pid, String name, double cpuUsage, double memoryUsage, String state, int priority, long startTime, String executablePath, String userName) {
+    public ProcessInfo(int pid, String name, double cpuUsage, double memoryUsage, String state, int priority, long startTime, String executablePath, String userName, String commandLine) {
         this.pid = pid;
         this.name = name;
         this.cpuUsage = cpuUsage;
@@ -29,6 +30,7 @@ public class ProcessInfo {
         this.startTime = startTime;
         this.executablePath = executablePath;
         this.userName = userName;
+        this.commandLine = commandLine;
     }
 
     public int getPid() {
@@ -65,5 +67,9 @@ public class ProcessInfo {
 
     public String getUserName() {
         return userName;
+    }
+
+    public String getCommandLine() {
+        return commandLine;
     }
 }
