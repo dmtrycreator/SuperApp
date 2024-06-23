@@ -47,22 +47,25 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 public class ProcessTracking {
 
     @FXML
+    private TableView<ProcessInfo> processTrackingTableView;
+
+    @FXML
+    private ComboBox<String> processFilterComboBox;
+
+    @FXML
+    private MenuItem menu_item_report;
+
+    @FXML
+    private Label statusLabel;
+
+    @FXML
     private RadioMenuItem actProcessesMenuItem;
 
     @FXML
     private RadioMenuItem allProcessesMenuItem;
 
     @FXML
-    private RadioMenuItem superAppProcessesMenuItem;
-
-    @FXML
     private VBox main_vbox;
-
-    @FXML
-    private MenuItem menu_item_report;
-
-    @FXML
-    private TableView<ProcessInfo> processTrackingTableView;
 
     @FXML
     private MenuItem resourseMenuItem;
@@ -74,16 +77,30 @@ public class ProcessTracking {
     private MenuItem searchMenuItem;
 
     @FXML
-    private MenuBar settingsMenu;
+    private MenuItem settingsMenuItem;
 
     @FXML
-    private MenuItem settingsMenuItem;
+    private MenuBar settingsMenu;
 
     @FXML
     private StackPane stackMain;
 
     @FXML
-    private Label statusLabel;
+    private RadioMenuItem superAppProcessesMenuItem;
+
+    @FXML
+    private TableColumn<ProcessInfo, Integer> pidColumn;
+
+    @FXML
+    private TableColumn<ProcessInfo, String> nameColumn;
+
+    @FXML
+    private TableColumn<ProcessInfo, Double> cpuUsageColumn;
+
+    @FXML
+    private TableColumn<ProcessInfo, Long> memoryUsageColumn;
+
+    private ObservableList<ProcessInfo> processList;
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private long updateInterval = 5; // Интервал обновления в секундах, можно настроить в настройках
@@ -94,8 +111,6 @@ public class ProcessTracking {
     private long startTime = System.currentTimeMillis() / 1000;
 
     private StringBuilder logBuilder = new StringBuilder();
-
-    private ObservableList<ProcessInfo> processList;
 
     public void initialize() {
         initializeTableColumns();
@@ -113,39 +128,6 @@ public class ProcessTracking {
         menu_item_report.setOnAction(event -> saveLogReport());
     }
 
-    private void setupKeyShortcuts() {
-        processTrackingTableView.setOnKeyPressed(event -> {
-            if (event.isControlDown()) {
-                switch (event.getCode()) {
-                    case P:
-                        executeForSelectedProcess(this::openProcessInfoWindow);
-                        break;
-                    case S:
-                        executeForSelectedProcess(this::interruptProcess);
-                        break;
-                    case C:
-                        executeForSelectedProcess(this::continueProcess);
-                        break;
-                    case T:
-                        executeForSelectedProcess(this::terminateProcess);
-                        break;
-                    case I:
-                        executeForSelectedProcess(this::interruptProcess);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        });
-    }
-
-    private void executeForSelectedProcess(java.util.function.Consumer<ProcessInfo> action) {
-        ProcessInfo selectedProcess = processTrackingTableView.getSelectionModel().getSelectedItem();
-        if (selectedProcess != null) {
-            action.accept(selectedProcess);
-        }
-    }
-
     public void setDefaultSelection() {
         actProcessesMenuItem.setSelected(true);
         updateProcessTable();
@@ -158,19 +140,10 @@ public class ProcessTracking {
     }
 
     private void initializeTableColumns() {
-        TableColumn<ProcessInfo, Integer> pidColumn = new TableColumn<>("PID");
         pidColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getPid()));
-
-        TableColumn<ProcessInfo, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getName()));
-
-        TableColumn<ProcessInfo, Double> cpuUsageColumn = new TableColumn<>("CPU Usage (%)");
         cpuUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getCpuUsage() * 100.0) / 100.0));
-
-        TableColumn<ProcessInfo, Long> memoryUsageColumn = new TableColumn<>("Memory Usage (MB)");
         memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getMemoryUsage())));
-
-        processTrackingTableView.getColumns().addAll(pidColumn, nameColumn, cpuUsageColumn, memoryUsageColumn);
     }
 
     private void updateProcessTable() {
@@ -234,8 +207,12 @@ public class ProcessTracking {
 
     private boolean containsPid(String[] pids, int pid) {
         for (String p : pids) {
-            if (Integer.parseInt(p) == pid) {
-                return true;
+            try {
+                if (Integer.parseInt(p) == pid) {
+                    return true;
+                }
+            } catch (NumberFormatException e) {
+                log("Некорректный формат PID: " + p);
             }
         }
         return false;
@@ -372,6 +349,7 @@ public class ProcessTracking {
     }
 
     private void startProcessUpdateScheduler() {
+        scheduler = Executors.newScheduledThreadPool(1);
         Runnable updateTask = () -> Platform.runLater(this::updateProcessTable);
         scheduler.scheduleAtFixedRate(updateTask, 0, updateInterval, TimeUnit.SECONDS);
     }
