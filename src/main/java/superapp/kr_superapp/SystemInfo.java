@@ -271,8 +271,8 @@ public class SystemInfo {
     private void saveLogReport() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Log Report");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
-        fileChooser.setInitialFileName("log_report.txt");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.log"));
+        fileChooser.setInitialFileName("log_report.log");
 
         File initialDirectory = new File("src/main/log");
         if (!initialDirectory.exists()) {
