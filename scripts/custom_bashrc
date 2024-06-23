@@ -1,6 +1,6 @@
 #!/bin/bash
 # Установка ограниченного PATH
-export PATH=$HOME/.superapp/scripts:/usr/bin:/bin
+export PATH=$PATH:$HOME/SuperApp/scripts
 
 # Ограничение истории команд
 HISTFILE=/dev/null
@@ -10,16 +10,16 @@ set +m
 
 echo "SuperApp Терминал:"
 
-alias help='$HOME/.superapp/scripts/superApphelp'
-alias cat='$HOME/.superapp/scripts/superAppCat'
-alias cd='$HOME/.superapp/scripts/superAppCd'
-alias cp='$HOME/.superapp/scripts/superAppCp'
-alias hostname='$HOME/.superapp/scripts/superAppHostname'
-alias ip='$HOME/.superapp/scripts/superAppIp'
-alias ls='$HOME/.superapp/scripts/superAppLs'
-alias mkdir='$HOME/.superapp/scripts/superAppMkdir'
-alias mv='$HOME/.superapp/scripts/superAppMv'
-alias ping='$HOME/.superapp/scripts/superAppPing'
-alias rm='$HOME/.superapp/scripts/superAppRm'
-alias rmdir='$HOME/.superapp/scripts/superAppRmdir'
-alias touch='$HOME/.superapp/scripts/superAppTouch'
+alias help='superAppHelp'
+alias ls='superAppLs'
+alias cd='superAppCd'
+alias mkdir='superAppMkdir'
+alias rm='superAppRm'
+alias rmdir='superAppRmdir'
+alias ping='superAppPing'
+alias hostname='superAppHostname'
+alias ip='superAppIp'
+alias touch='superAppTouch'
+alias cp='superAppCp'
+alias mv='superAppMv'
+alias cat='superAppCat'
