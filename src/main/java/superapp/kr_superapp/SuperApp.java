@@ -2,15 +2,10 @@ package superapp.kr_superapp;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class SuperApp extends Application {
     private static final String HOME_DIR = System.getProperty("user.home") + "/SuperApp/src/main/home";
@@ -53,7 +48,7 @@ public class SuperApp extends Application {
         controller.setStage(stage);
 
         stage.setScene(scene);
-        stage.setTitle("SuperApp: Установка");
+        stage.setTitle("SuperApp Installation");
         stage.show();
     }
 
@@ -68,7 +63,7 @@ public class SuperApp extends Application {
             System.err.println("CSS file not found");
         }
 
-        stage.setTitle("SuperApp: Файловый Менеджер");
+        stage.setTitle("SuperApp");
         stage.setScene(scene);
         stage.show();
         stage.setResizable(false);
@@ -76,13 +71,14 @@ public class SuperApp extends Application {
 
     private void trackSuperAppProcesses() {
         List<String> pids = ProcessUtils.getLinuxProcesses().stream()
-                .filter(process -> process.getExecutablePath().contains("SuperApp"))
-                .map(process -> process.getPid() + ":" + process.getName())
+                .filter(process -> process.getCommandLine().contains("SuperApp"))
+                .map(ProcessInfo::getPid)
+                .map(String::valueOf)
                 .collect(Collectors.toList());
 
         try {
             FileMappingHandler fileMappingHandler = new FileMappingHandler();
-            fileMappingHandler.writeData(("superapp_processes:" + String.join(",", pids)).getBytes());
+            fileMappingHandler.writeData(String.join(",", pids).getBytes());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
