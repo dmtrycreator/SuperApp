@@ -65,6 +65,9 @@ public class ProcessTracking {
     private RadioMenuItem allProcessesMenuItem;
 
     @FXML
+    private RadioMenuItem superAppProcessesMenuItem;
+
+    @FXML
     private VBox main_vbox;
 
     @FXML
@@ -85,25 +88,13 @@ public class ProcessTracking {
     @FXML
     private StackPane stackMain;
 
-    @FXML
-    private RadioMenuItem superAppProcessesMenuItem;
-
-    @FXML
-    private TableColumn<ProcessInfo, Integer> pidColumn;
-
-    @FXML
-    private TableColumn<ProcessInfo, String> nameColumn;
-
-    @FXML
-    private TableColumn<ProcessInfo, Double> cpuUsageColumn;
-
-    @FXML
-    private TableColumn<ProcessInfo, Long> memoryUsageColumn;
-
-    private ObservableList<ProcessInfo> processList;
+    private TableColumn<ProcessInfo, Integer> pidColumn = new TableColumn<>("PID");
+    private TableColumn<ProcessInfo, String> nameColumn = new TableColumn<>("Name");
+    private TableColumn<ProcessInfo, Double> cpuUsageColumn = new TableColumn<>("CPU Usage");
+    private TableColumn<ProcessInfo, Long> memoryUsageColumn = new TableColumn<>("Memory Usage");
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private long updateInterval = 5; // Интервал обновления в секундах, можно настроить в настройках
+    private long updateInterval = 5; // Update interval in seconds, can be adjusted in settings
 
     private SystemMonitor systemMonitor = new SystemMonitor();
     private long previousBytesReceived = 0;
@@ -114,21 +105,28 @@ public class ProcessTracking {
 
     public void initialize() {
         initializeTableColumns();
-        setDefaultSelection();
-        addRadioButtonsHandlers();
-        startProcessUpdateScheduler();
+        updateProcessTable();
+
+        allProcessesMenuItem.setOnAction(event -> showAllProcesses());
+        actProcessesMenuItem.setOnAction(event -> showActiveProcesses());
+        superAppProcessesMenuItem.setOnAction(event -> showSuperAppProcesses());
+
+        actProcessesMenuItem.setSelected(true);
 
         addContextMenu();
-        setupKeyShortcuts();
+        startProcessUpdateScheduler();
 
         settingsMenuItem.setOnAction(event -> openSettingsOverlay());
         searchMenuItem.setOnAction(event -> openSearchOverlay());
         resourseMenuItem.setOnAction(event -> openResourceMonitorOverlay());
 
+        setupKeyShortcuts();
+
         menu_item_report.setOnAction(event -> saveLogReport());
+
+        System.out.println("ProcessTracking initialized successfully.");
     }
 
-    
     private void setupKeyShortcuts() {
         processTrackingTableView.setOnKeyPressed(event -> {
             if (event.isControlDown()) {
@@ -162,22 +160,15 @@ public class ProcessTracking {
         }
     }
 
-    public void setDefaultSelection() {
-        actProcessesMenuItem.setSelected(true);
-        updateProcessTable();
-    }
-
-    private void addRadioButtonsHandlers() {
-        allProcessesMenuItem.setOnAction(event -> showAllProcesses());
-        actProcessesMenuItem.setOnAction(event -> showActiveProcesses());
-        superAppProcessesMenuItem.setOnAction(event -> showSuperAppProcesses());
-    }
-
     private void initializeTableColumns() {
+        System.out.println("Initializing table columns.");
+
         pidColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getPid()));
         nameColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getName()));
         cpuUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getCpuUsage() * 100.0) / 100.0));
         memoryUsageColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(Math.round(data.getValue().getMemoryUsage())));
+
+        processTrackingTableView.getColumns().addAll(pidColumn, nameColumn, cpuUsageColumn, memoryUsageColumn);
     }
 
     private void updateProcessTable() {
@@ -190,7 +181,7 @@ public class ProcessTracking {
                 processes = getSuperAppProcesses();
                 break;
         }
-        processList = FXCollections.observableArrayList(processes);
+        ObservableList<ProcessInfo> processList = FXCollections.observableArrayList(processes);
         processTrackingTableView.setItems(processList);
 
         try {
@@ -228,9 +219,11 @@ public class ProcessTracking {
         try {
             FileMappingHandler fileMappingHandler = new FileMappingHandler();
             byte[] data = fileMappingHandler.readData();
-            String[] pids = new String(data).trim().split(",");
-            return getAllProcesses().stream()
-                    .filter(process -> containsPid(pids, process.getPid()))
+            String[] processNames = new String(data).trim().split(",");
+
+            List<ProcessInfo> processes = getAllProcesses();
+            return processes.stream()
+                    .filter(process -> Arrays.asList(processNames).contains(process.getName()))
                     .collect(Collectors.toList());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -239,34 +232,18 @@ public class ProcessTracking {
         }
     }
 
-    private boolean containsPid(String[] pids, int pid) {
-        for (String p : pids) {
-            try {
-                if (Integer.parseInt(p) == pid) {
-                    return true;
-                }
-            } catch (NumberFormatException e) {
-                log("Некорректный формат PID: " + p);
-            }
-        }
-        return false;
-    }
-
     private void showAllProcesses() {
-        processList = FXCollections.observableArrayList(getAllProcesses());
+        ObservableList<ProcessInfo> processList = FXCollections.observableArrayList(getAllProcesses());
         processTrackingTableView.setItems(processList);
     }
 
     private void showActiveProcesses() {
-        List<ProcessInfo> activeProcesses = getAllProcesses().stream()
-                .filter(process -> process.getCpuUsage() > 0)
-                .collect(Collectors.toList());
-        processTrackingTableView.setItems(FXCollections.observableArrayList(activeProcesses));
-    }
-
-    private void showSuperAppProcesses() {
-        processList = FXCollections.observableArrayList(getSuperAppProcesses());
-        processTrackingTableView.setItems(processList);
+        ObservableList<ProcessInfo> activeProcesses = FXCollections.observableArrayList(
+                processTrackingTableView.getItems().stream()
+                        .filter(process -> process.getCpuUsage() > 0)
+                        .collect(Collectors.toList())
+        );
+        processTrackingTableView.setItems(activeProcesses);
     }
 
     private String getSelectedFilter() {
@@ -426,7 +403,7 @@ public class ProcessTracking {
     }
 
     private void performSearch(String keywords) {
-        List<ProcessInfo> searchResults = processList.stream()
+        List<ProcessInfo> searchResults = processTrackingTableView.getItems().stream()
                 .filter(process -> process.getName().toLowerCase().contains(keywords.toLowerCase()))
                 .collect(Collectors.toList());
         processTrackingTableView.setItems(FXCollections.observableArrayList(searchResults));
@@ -537,7 +514,6 @@ public class ProcessTracking {
     }
 
     private void updateCharts(AreaChart<Number, Number> cpuChart, AreaChart<Number, Number> memoryChart, AreaChart<Number, Number> networkChart) {
-        // Обновление данных для графиков
         updateCpuChart(cpuChart);
         updateMemoryChart(memoryChart);
         updateNetworkChart(networkChart);
@@ -638,7 +614,7 @@ public class ProcessTracking {
         File file = fileChooser.showSaveDialog(processTrackingTableView.getScene().getWindow());
         if (file != null) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                for (ProcessInfo process : processList) {
+                for (ProcessInfo process : processTrackingTableView.getItems()) {
                     writer.write(String.format("PID: %d, Name: %s, CPU Usage: %.2f%%, Memory Usage: %d MB, Executable Path: %s%n",
                             process.getPid(), process.getName(), process.getCpuUsage(), process.getMemoryUsage(), process.getExecutablePath()));
                 }
@@ -662,7 +638,20 @@ public class ProcessTracking {
         List<ProcessInfo> filteredProcesses = processes.stream()
                 .filter(process -> process.getExecutablePath().startsWith(directoryPath.toString()))
                 .collect(Collectors.toList());
-        processList = FXCollections.observableArrayList(filteredProcesses);
+        ObservableList<ProcessInfo> processList = FXCollections.observableArrayList(filteredProcesses);
         processTrackingTableView.setItems(processList);
+    }
+
+    public void setDefaultSelection() {
+        Platform.runLater(() -> {
+            if (!processTrackingTableView.getItems().isEmpty()) {
+                processTrackingTableView.getSelectionModel().selectFirst();
+            }
+        });
+    }
+
+    private void showSuperAppProcesses() {
+        ObservableList<ProcessInfo> superAppProcesses = FXCollections.observableArrayList(getSuperAppProcesses());
+        processTrackingTableView.setItems(superAppProcesses);
     }
 }
