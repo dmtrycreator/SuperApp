@@ -110,7 +110,7 @@
                <children>
                   <Pane prefHeight="46.0" prefWidth="435.0" style="-fx-background-color: #272727; -fx-background-radius: 12;">
                      <children>
-                        <Label fx:id="statusLabel" layoutX="25.0" layoutY="14.0" text="Состояние" textFill="#f5faff">
+                        <Label fx:id="statusLabel" layoutX="25.0" layoutY="14.0" text="Состояние" textFill="#83888B">
                            <font>
                               <Font name="Inter Regular" size="14.0" />
                            </font>
