@@ -365,19 +365,20 @@ public class TerminalController {
     }
 
     @FXML
-    private void handleTerminalShortcut() {
-        statusLabel.setText("Клавиши нажаты"); // Подтверждение нажатия клавиш
-        try {
-            ProcessBuilder pb = new ProcessBuilder(
-                    "gnome-terminal",
-                    "--",
-                    "/bin/bash",
-                    "--rcfile",
-                    System.getProperty("user.home") + "/.superapp/scripts/custom_bashrc"
-            );
-            pb.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+private void handleTerminalShortcut() {
+    statusLabel.setText("Клавиши нажаты"); // Подтверждение нажатия клавиш
+    try {
+        ProcessBuilder pb = new ProcessBuilder(
+                "gnome-terminal",
+                "--",
+                "/bin/bash",
+                "--rcfile",
+                System.getProperty("user.home") + "/SuperApp/scripts/custom_bashrc"
+        );
+        pb.start();
+    } catch (IOException e) {
+        e.printStackTrace();
     }
+}
+
 }
