@@ -1,5 +1,6 @@
 package superapp.kr_superapp;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -222,80 +223,84 @@ public class TerminalController {
 
     // Метод для обновления меток результатов и времени выполнения
     private void updateLabels(String command, String result, Date executionStartTime) {
-        // Создаем новую запись команды
-        VBox commandEntry = new VBox();
-        commandEntry.setSpacing(10.0);
-        commandEntry.setPadding(new Insets(0, 26, 0, 0)); // Добавляем отступ слева
+        Platform.runLater(() -> {
+            // Создаем новую запись команды
+            VBox commandEntry = new VBox();
+            commandEntry.setSpacing(10.0);
+            commandEntry.setPadding(new Insets(0, 26, 0, 0)); // Добавляем отступ слева
 
-        // Создаем HBox для текста с пользователем и директорией
-        HBox userTimeBox = new HBox();
-        userTimeBox.setSpacing(20);
-        userTimeBox.setPadding(new Insets(0, 26, 0, 26));
+            // Создаем HBox для текста с пользователем и директорией
+            HBox userTimeBox = new HBox();
+            userTimeBox.setSpacing(20);
+            userTimeBox.setPadding(new Insets(0, 26, 0, 26));
 
-        // Создаем метку текста с пользователем и директорией
-        Label userLabel = new Label(userName + " ~ Terminal File Manager");
-        userLabel.setStyle("-fx-opacity: 0.6; -fx-text-fill: #469ee9; -fx-font-family: Inter Medium; -fx-font-size: 16;");
-        userTimeBox.getChildren().add(userLabel);
+            // Создаем метку текста с пользователем и директорией
+            Label userLabel = new Label(userName + " ~ Terminal File Manager");
+            userLabel.setStyle("-fx-opacity: 0.6; -fx-text-fill: #469ee9; -fx-font-family: Inter Medium; -fx-font-size: 16;");
+            userTimeBox.getChildren().add(userLabel);
 
-        // Вычисляем время выполнения команды
-        Date executionEndTime = new Date();
-        long executionTime = executionEndTime.getTime() - executionStartTime.getTime();
+            // Вычисляем время выполнения команды
+            Date executionEndTime = new Date();
+            long executionTime = executionEndTime.getTime() - executionStartTime.getTime();
 
-        // Создаем и настраиваем время выполнения команды
-        Label timeLabel = new Label("(" + executionTime + " ms)");
-        timeLabel.setStyle("-fx-opacity: 0.4; -fx-text-fill: #83888b;");
-        userTimeBox.getChildren().add(timeLabel);
+            // Создаем и настраиваем время выполнения команды
+            Label timeLabel = new Label("(" + executionTime + " ms)");
+            timeLabel.setStyle("-fx-opacity: 0.4; -fx-text-fill: #83888b;");
+            userTimeBox.getChildren().add(timeLabel);
 
-        // Добавляем HBox в запись команды
-        commandEntry.getChildren().add(userTimeBox);
+            // Добавляем HBox в запись команды
+            commandEntry.getChildren().add(userTimeBox);
 
-        // Создаем и настраиваем название команды
-        Label commandLabel = new Label(command);
-        commandLabel.setStyle("-fx-text-fill: #83888b; -fx-font-family: Ubuntu Mono; -fx-font-size: 16; -fx-opacity: 0.6;"); // Устанавливаем прозрачность в 0.6
-        commandLabel.setPadding(new Insets(0, 26, 0, 26));
-        commandEntry.getChildren().add(commandLabel);
+            // Создаем и настраиваем название команды
+            Label commandLabel = new Label(command);
+            commandLabel.setStyle("-fx-text-fill: #83888b; -fx-font-family: Ubuntu Mono; -fx-font-size: 16; -fx-opacity: 0.6;"); // Устанавливаем прозрачность в 0.6
+            commandLabel.setPadding(new Insets(0, 26, 0, 26));
+            commandEntry.getChildren().add(commandLabel);
 
-        TextFlow resultTextFlow = new TextFlow();
-        resultTextFlow.setPrefWidth(888.0); // Ширина может быть фиксированной
-        resultTextFlow.setStyle("-fx-font-family: Ubuntu Mono; -fx-font-size: 16;");
-        resultTextFlow.setLineSpacing(5.0); // Устанавливаем промежуток между строками
-        resultTextFlow.setPadding(new Insets(0, 26, 0, 26)); // Уменьшаем отступ сверху до 5 пикселей
+            TextFlow resultTextFlow = new TextFlow();
+            resultTextFlow.setPrefWidth(888.0); // Ширина может быть фиксированной
+            resultTextFlow.setStyle("-fx-font-family: Ubuntu Mono; -fx-font-size: 16;");
+            resultTextFlow.setLineSpacing(5.0); // Устанавливаем промежуток между строками
+            resultTextFlow.setPadding(new Insets(0, 26, 0, 26)); // Уменьшаем отступ сверху до 5 пикселей
 
-        // Создаем текст для отображения в TextFlow
-        Text resultText = new Text(result);
-        resultText.setFill(Color.web("#83888b")); // Задаем цвет текста
+            // Создаем текст для отображения в TextFlow
+            Text resultText = new Text(result);
+            resultText.setFill(Color.web("#83888b")); // Задаем цвет текста
 
-        // Добавляем текст в TextFlow
-        resultTextFlow.getChildren().add(resultText);
-        resultTextFlow.setPadding(new Insets(0, 26, 0, 26));
-        commandEntry.getChildren().add(resultTextFlow);
+            // Добавляем текст в TextFlow
+            resultTextFlow.getChildren().add(resultText);
+            resultTextFlow.setPadding(new Insets(0, 26, 0, 26));
+            commandEntry.getChildren().add(resultTextFlow);
 
-        // Добавляем созданную запись команды в конец списка предыдущих записей
-        pastCommand.getChildren().add(commandEntry);
+            // Добавляем созданную запись команды в конец списка предыдущих записей
+            pastCommand.getChildren().add(commandEntry);
 
-        // Создаем и добавляем линию-разделитель
-        Line separatorLine = new Line();
-        separatorLine.setStartX(0);
-        separatorLine.setEndX(940);
-        separatorLine.setStroke(Color.web("#1E1E1E")); // Задаем цвет линии
-        separatorLine.setStrokeWidth(3); // Задаем толщину линии
-        commandEntry.getChildren().add(separatorLine);
+            // Создаем и добавляем линию-разделитель
+            Line separatorLine = new Line();
+            separatorLine.setStartX(0);
+            separatorLine.setEndX(940);
+            separatorLine.setStroke(Color.web("#1E1E1E")); // Задаем цвет линии
+            separatorLine.setStrokeWidth(3); // Задаем толщину линии
+            commandEntry.getChildren().add(separatorLine);
+        });
     }
 
     // Метод для удаления подсказок
     private void removeTips() {
-        if (!tipsRemoved) {
-            if (terminalVBox.getChildren().contains(tipOneHBox)) {
-                terminalVBox.getChildren().remove(tipOneHBox);
+        Platform.runLater(() -> {
+            if (!tipsRemoved) {
+                if (terminalVBox.getChildren().contains(tipOneHBox)) {
+                    terminalVBox.getChildren().remove(tipOneHBox);
+                }
+                if (terminalVBox.getChildren().contains(tipTwoHBox)) {
+                    terminalVBox.getChildren().remove(tipTwoHBox);
+                }
+                if (terminalVBox.getChildren().contains(tipThreeHBox)) {
+                    terminalVBox.getChildren().remove(tipThreeHBox);
+                }
+                tipsRemoved = true; // Устанавливаем флаг, чтобы избежать повторного удаления
             }
-            if (terminalVBox.getChildren().contains(tipTwoHBox)) {
-                terminalVBox.getChildren().remove(tipTwoHBox);
-            }
-            if (terminalVBox.getChildren().contains(tipThreeHBox)) {
-                terminalVBox.getChildren().remove(tipThreeHBox);
-            }
-            tipsRemoved = true; // Устанавливаем флаг, чтобы избежать повторного удаления
-        }
+        });
     }
 
     // Метод для записи данных в файл отображения
@@ -355,7 +360,7 @@ public class TerminalController {
     private void handleHelpShortcut() {
         commandInputArea.setText("help");
         String command = commandInputArea.getText().trim();
-        executeCommand(command);
+        executeCommandAsync(command);
         commandInputArea.clear();
     }
 
@@ -365,20 +370,19 @@ public class TerminalController {
     }
 
     @FXML
-private void handleTerminalShortcut() {
-    statusLabel.setText("Клавиши нажаты"); // Подтверждение нажатия клавиш
-    try {
-        ProcessBuilder pb = new ProcessBuilder(
-                "gnome-terminal",
-                "--",
-                "/bin/bash",
-                "--rcfile",
-                System.getProperty("user.home") + "/SuperApp/scripts/custom_bashrc"
-        );
-        pb.start();
-    } catch (IOException e) {
-        e.printStackTrace();
+    private void handleTerminalShortcut() {
+        statusLabel.setText("Клавиши нажаты"); // Подтверждение нажатия клавиш
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "gnome-terminal",
+                    "--",
+                    "/bin/bash",
+                    "--rcfile",
+                    System.getProperty("user.home") + "/.superapp/scripts/custom_bashrc"
+            );
+            pb.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-}
-
 }
