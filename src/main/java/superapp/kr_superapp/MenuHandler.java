@@ -1,6 +1,5 @@
 package superapp.kr_superapp;
 
-import javafx.application.Platform;
 import javafx.scene.control.MenuItem;
 
 import java.io.IOException;
@@ -19,9 +18,9 @@ public class MenuHandler {
     }
 
     private void addMenuHandlers() {
-        menu_item_system_info.setOnAction(event -> Platform.runLater(this::openSystemInfo));
-        menu_item_processes.setOnAction(event -> Platform.runLater(this::openProcessTracking));
-        menu_item_terminal.setOnAction(event -> Platform.runLater(this::openTerminal));
+        menu_item_system_info.setOnAction(event -> openSystemInfo());
+        menu_item_processes.setOnAction(event -> openProcessTracking());
+        menu_item_terminal.setOnAction(event -> openTerminal());
     }
 
     private void openSystemInfo() {
@@ -42,22 +41,16 @@ public class MenuHandler {
             String filePath = new String(fileMappingHandler.readData()).trim();
             log("Путь к файлу прочитан из общей памяти: " + filePath);
 
-            String javafxPath = "/opt/javafx/lib";
-            String classPath = System.getProperty("java.class.path");
+            String javafxPath = "lib/javafx-sdk-22.0.1/lib";
 
-            log("Запуск приложения с классом: " + appClassName + " и путём: " + filePath);
-
-            Process process = new ProcessBuilder(
+            new ProcessBuilder(
                     "java",
                     "--module-path", javafxPath,
                     "--add-modules", "javafx.controls,javafx.fxml",
-                    "-cp", classPath,
+                    "-cp", System.getProperty("java.class.path"),
                     appClassName,
-                    filePath // Передача пути к файлу как аргумент
+                    filePath
             ).start();
-
-            log("Процесс запущен: " + process.toString());
-
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             log("Ошибка чтения из общей памяти или запуска приложения: " + e.getMessage());
