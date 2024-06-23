@@ -144,7 +144,7 @@ public class TerminalController {
         try {
             // Проверяем, если команда "help", выводим справку по командам
             if (command.equals("help")) {
-                updateLabels(command, getHelpMessage(), new Date(), false);
+                Platform.runLater(() -> updateLabels(command, getHelpMessage(), new Date(), false));
                 removeTips(); // Удаляем подсказки при выводе справки
                 return;
             }
@@ -176,8 +176,10 @@ public class TerminalController {
             int exitCode = process.waitFor();
             if (exitCode == 0) {
                 Date endTime = new Date();
-                updateLabels(command, resultBuilder.toString(), endTime, true);
-                removeTips();
+                Platform.runLater(() -> {
+                    updateLabels(command, resultBuilder.toString(), endTime, true);
+                    removeTips();
+                });
                 writeToFile(resultBuilder.toString());
             } else {
                 System.err.println("Ошибка выполнения команды: " + command);
@@ -207,7 +209,7 @@ public class TerminalController {
             if (newDir.exists() && newDir.isDirectory()) {
                 currentDirectory = newDir.getAbsolutePath();
             } else {
-                updateLabels(command, "No such directory: " + newDir.getAbsolutePath(), new Date(), false);
+                Platform.runLater(() -> updateLabels(command, "No such directory: " + newDir.getAbsolutePath(), new Date(), false));
                 return;
             }
         }
@@ -249,7 +251,7 @@ public class TerminalController {
         resultTextFlow.setPadding(new Insets(0, 26, 0, 26));
 
         commandEntry.getChildren().add(resultTextFlow);
-        pastCommand.getChildren().add(commandEntry);
+        Platform.runLater(() -> pastCommand.getChildren().add(commandEntry));
 
         Line separatorLine = new Line();
         separatorLine.setStartX(0);
@@ -265,22 +267,26 @@ public class TerminalController {
     }
 
     private void updateResultText(VBox commandEntry, String result) {
-        TextFlow resultTextFlow = (TextFlow) commandEntry.getUserData();
-        Text resultText = new Text(result + "\n");
-        resultText.setFill(Color.web("#83888b"));
-        resultTextFlow.getChildren().add(resultText);
+        Platform.runLater(() -> {
+            TextFlow resultTextFlow = (TextFlow) commandEntry.getUserData();
+            Text resultText = new Text(result + "\n");
+            resultText.setFill(Color.web("#83888b"));
+            resultTextFlow.getChildren().add(resultText);
+        });
     }
 
     private void updateLabels(String command, String result, Date executionStartTime, boolean updateTime) {
-        VBox commandEntry = createCommandEntry(command, executionStartTime);
-        updateResultText(commandEntry, result);
+        Platform.runLater(() -> {
+            VBox commandEntry = createCommandEntry(command, executionStartTime);
+            updateResultText(commandEntry, result);
 
-        if (updateTime) {
-            Date executionEndTime = new Date();
-            long executionTime = executionEndTime.getTime() - executionStartTime.getTime();
-            Label timeLabel = (Label) commandEntry.getUserData();
-            timeLabel.setText("(" + executionTime + " ms)");
-        }
+            if (updateTime) {
+                Date executionEndTime = new Date();
+                long executionTime = executionEndTime.getTime() - executionStartTime.getTime();
+                Label timeLabel = (Label) commandEntry.getUserData();
+                timeLabel.setText("(" + executionTime + " ms)");
+            }
+        });
     }
 
     private void removeTips() {
