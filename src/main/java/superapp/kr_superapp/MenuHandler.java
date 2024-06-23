@@ -1,7 +1,6 @@
 package superapp.kr_superapp;
 
 import javafx.scene.control.MenuItem;
-
 import java.io.IOException;
 
 public class MenuHandler {
@@ -34,7 +33,7 @@ public class MenuHandler {
         openApp("superapp.kr_superapp.TerminalApp", "Terminal");
     }
 
-    private void openApp(String appClassName, String title) {
+    private void openApp(String appClassName, String processName) {
         new Thread(() -> {
             try {
                 FileMappingHandler fileMappingHandler = new FileMappingHandler();
@@ -49,7 +48,8 @@ public class MenuHandler {
                         "--add-modules", "javafx.controls,javafx.fxml",
                         "-cp", System.getProperty("java.class.path"),
                         appClassName,
-                        filePath
+                        filePath,
+                        processName 
                 );
 
                 processBuilder.inheritIO(); // Выводим все логи в консоль для отладки
@@ -68,4 +68,3 @@ public class MenuHandler {
         Controller.log(message);
     }
 }
-
