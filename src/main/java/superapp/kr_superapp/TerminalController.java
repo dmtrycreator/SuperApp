@@ -109,8 +109,8 @@ public class TerminalController {
         commandInputArea.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
                 String command = commandInputArea.getText().trim();
-                executeCommand(command);
                 commandInputArea.clear();
+                executeCommandAsync(command);
             }
         });
 
@@ -129,7 +129,10 @@ public class TerminalController {
                 handleTerminalShortcut();
             }
         });
+    }
 
+    public void executeCommandAsync(String command) {
+        new Thread(() -> executeCommand(command)).start();
     }
 
     public void executeCommand(String command) {
@@ -346,10 +349,6 @@ public class TerminalController {
                 mv <src> <dest> - Перемещает файл или директорию.
                 cat <file> - Выводит содержимое файла.
             """;
-    }
-
-    public void executeCommandAsync(String command) {
-        new Thread(() -> executeCommand(command)).start();
     }
 
     @FXML
