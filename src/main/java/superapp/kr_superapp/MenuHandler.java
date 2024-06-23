@@ -2,7 +2,9 @@ package superapp.kr_superapp;
 
 import javafx.scene.control.MenuItem;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class MenuHandler {
 
@@ -51,10 +53,24 @@ public class MenuHandler {
                     appClassName,
                     filePath
             );
-            
+
             log("Запуск приложения с командой: " + String.join(" ", processBuilder.command()));
             
             Process process = processBuilder.start();
+
+            // Read output and error streams
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                 BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    log("OUTPUT: " + line);
+                }
+                while ((line = errorReader.readLine()) != null) {
+                    log("ERROR: " + line);
+                }
+            }
+
             int exitCode = process.waitFor();
             log("Приложение завершилось с кодом: " + exitCode);
 
