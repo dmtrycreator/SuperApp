@@ -172,28 +172,31 @@ public class ProcessTracking {
     }
 
     private void updateProcessTable() {
-        List<ProcessInfo> processes = getAllProcesses();
-        switch (getSelectedFilter()) {
-            case "active":
-                processes = processes.stream().filter(process -> process.getCpuUsage() > 0).collect(Collectors.toList());
-                break;
-            case "superApp":
-                processes = getSuperAppProcesses();
-                break;
-        }
-        ObservableList<ProcessInfo> processList = FXCollections.observableArrayList(processes);
-        processTrackingTableView.setItems(processList);
+        Platform.runLater(() -> {
+            List<ProcessInfo> processes = getAllProcesses();
+            switch (getSelectedFilter()) {
+                case "active":
+                    processes = processes.stream().filter(process -> process.getCpuUsage() > 0).collect(Collectors.toList());
+                    break;
+                case "superApp":
+                    processes = getSuperAppProcesses();
+                    break;
+            }
+            ObservableList<ProcessInfo> processList = FXCollections.observableArrayList(processes);
+            processTrackingTableView.setItems(processList);
 
-        try {
-            FileMappingHandler fileMappingHandler = new FileMappingHandler();
-            String processCount = String.valueOf(processList.size());
-            fileMappingHandler.writeData(processCount.getBytes());
-            log("Количество процессов записано в общую память: " + processCount);
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            log("Ошибка записи количества процессов в общую память: " + e.getMessage());
-        }
+            try {
+                FileMappingHandler fileMappingHandler = new FileMappingHandler();
+                String processCount = String.valueOf(processList.size());
+                fileMappingHandler.writeData(processCount.getBytes());
+                log("Количество процессов записано в общую память: " + processCount);
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                log("Ошибка записи количества процессов в общую память: " + e.getMessage());
+            }
+        });
     }
+
 
     private List<ProcessInfo> getAllProcesses() {
         SystemInfo si = new SystemInfo();
@@ -238,13 +241,16 @@ public class ProcessTracking {
     }
 
     private void showActiveProcesses() {
-        ObservableList<ProcessInfo> activeProcesses = FXCollections.observableArrayList(
-                processTrackingTableView.getItems().stream()
-                        .filter(process -> process.getCpuUsage() > 0)
-                        .collect(Collectors.toList())
-        );
-        processTrackingTableView.setItems(activeProcesses);
+        String currentProcessName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+        String currentPid = currentProcessName.split("@")[0];
+
+        List<ProcessInfo> activeProcesses = getAllProcesses().stream()
+                .filter(process -> process.getCpuUsage() > 0 && !String.valueOf(process.getPid()).equals(currentPid))
+                .collect(Collectors.toList());
+
+        processTrackingTableView.setItems(FXCollections.observableArrayList(activeProcesses));
     }
+
 
     private String getSelectedFilter() {
         if (actProcessesMenuItem.isSelected()) {
