@@ -18,23 +18,18 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
 
 import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
@@ -45,9 +40,6 @@ public class ProcessTracking {
 
     @FXML
     private TableView<ProcessInfo> processTrackingTableView;
-
-    @FXML
-    private ComboBox<String> processFilterComboBox;
 
     @FXML
     private MenuItem menu_item_report;
@@ -173,7 +165,7 @@ public class ProcessTracking {
             List<ProcessInfo> processes = getAllProcesses();
             switch (getSelectedFilter()) {
                 case "active":
-                    processes = processes.stream().filter(process -> process.getCpuUsage() > 0).collect(Collectors.toList());
+                    processes = processes.stream().filter(process -> process.getCpuUsage() > 0 && !getSuperAppPIDs().contains(process.getPid())).collect(Collectors.toList());
                     break;
                 case "superApp":
                     processes = getSuperAppProcesses();
@@ -194,6 +186,20 @@ public class ProcessTracking {
         });
     }
 
+    private List<Integer> getSuperAppPIDs() {
+        String currentProcessName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+        String currentPid = currentProcessName.split("@")[0];
+
+        List<Integer> superAppPIDs = new ArrayList<>();
+        superAppPIDs.add(Integer.parseInt(currentPid));
+
+        List<ProcessHandle> descendants = ProcessHandle.current().descendants().toList();
+        for (ProcessHandle ph : descendants) {
+            superAppPIDs.add((int) ph.pid());
+        }
+
+        return superAppPIDs;
+    }
 
     private List<ProcessInfo> getAllProcesses() {
         SystemInfo si = new SystemInfo();
@@ -216,20 +222,11 @@ public class ProcessTracking {
     }
 
     private List<ProcessInfo> getSuperAppProcesses() {
-        try {
-            FileMappingHandler fileMappingHandler = new FileMappingHandler();
-            byte[] data = fileMappingHandler.readData();
-            String[] processNames = new String(data).trim().split(",");
-
-            List<ProcessInfo> processes = getAllProcesses();
-            return processes.stream()
-                    .filter(process -> Arrays.asList(processNames).contains(process.getName()))
-                    .collect(Collectors.toList());
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            log("Ошибка чтения из общей памяти: " + e.getMessage());
-            return FXCollections.observableArrayList();
-        }
+        List<Integer> superAppPIDs = getSuperAppPIDs();
+        List<ProcessInfo> processes = getAllProcesses();
+        return processes.stream()
+                .filter(process -> superAppPIDs.contains(process.getPid()))
+                .collect(Collectors.toList());
     }
 
     private void showAllProcesses() {
@@ -239,15 +236,12 @@ public class ProcessTracking {
 
     private void showActiveProcesses() {
         List<Integer> superAppPIDs = getSuperAppPIDs();
-
         List<ProcessInfo> activeProcesses = getAllProcesses().stream()
                 .filter(process -> process.getCpuUsage() > 0 && !superAppPIDs.contains(process.getPid()))
                 .collect(Collectors.toList());
 
         processTrackingTableView.setItems(FXCollections.observableArrayList(activeProcesses));
     }
-
-
 
     private String getSelectedFilter() {
         if (actProcessesMenuItem.isSelected()) {
@@ -474,23 +468,6 @@ public class ProcessTracking {
         startProcessUpdateScheduler();
     }
 
-    private List<Integer> getSuperAppPIDs() {
-        String currentProcessName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
-        String currentPid = currentProcessName.split("@")[0];
-
-        List<Integer> superAppPIDs = new ArrayList<>();
-        superAppPIDs.add(Integer.parseInt(currentPid));
-
-        // Добавим логику для получения PID всех дочерних процессов
-        List<ProcessHandle> descendants = ProcessHandle.current().descendants().toList();
-        for (ProcessHandle ph : descendants) {
-            superAppPIDs.add((int) ph.pid());
-        }
-
-        return superAppPIDs;
-    }
-
-
     private void openResourceMonitorOverlay() {
         VBox monitorOverlay = new VBox();
         monitorOverlay.setAlignment(Pos.CENTER);
@@ -627,24 +604,35 @@ public class ProcessTracking {
 
     private void saveLogReport() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Сохранить отчет о процессах");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
-        fileChooser.setInitialFileName("process_log.log");
+        fileChooser.setTitle("Сохранить отчет журнала");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "*.log"));
+        fileChooser.setInitialFileName("log.log");
 
-        File file = fileChooser.showSaveDialog(processTrackingTableView.getScene().getWindow());
+        File initialDirectory = new File("src/main/log");
+        if (!initialDirectory.exists()) {
+            initialDirectory.mkdirs();
+        }
+        fileChooser.setInitialDirectory(initialDirectory);
+
+        File file = fileChooser.showSaveDialog(stackMain.getScene().getWindow());
         if (file != null) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                for (ProcessInfo process : processTrackingTableView.getItems()) {
-                    writer.write(String.format("PID: %d, Name: %s, CPU Usage: %.2f%%, Memory Usage: %d MB, Executable Path: %s%n",
-                            process.getPid(), process.getName(), process.getCpuUsage(), process.getMemoryUsage(), process.getExecutablePath()));
+                writer.write(logBuilder.toString());
+                log("Отчет журнала сохранен в: " + file.getAbsolutePath());
+                setStatusMessage("Отчет журнала сохранен");
+
+                if (file.setReadOnly()) {
+                    log("Файл установлен в режим только для чтения");
+                } else {
+                    log("Не удалось установить файл в режим только для чтения");
                 }
-                log("Отчет сохранен в: " + file.getAbsolutePath());
-                setStatusMessage("Отчет сохранен в: " + file.getAbsolutePath());
             } catch (IOException e) {
-                e.printStackTrace();
-                log("Ошибка при сохранении отчета: " + e.getMessage());
-                setStatusMessage("Ошибка при сохранении отчета.");
+                log("Ошибка сохранения отчета журнала: " + e.getMessage());
+                setStatusMessage("Ошибка сохранения отчета журнала");
             }
+        } else {
+            log("Сохранение отчета журнала отменено");
+            setStatusMessage("Сохранение отчета журнала отменено");
         }
     }
 
@@ -671,13 +659,7 @@ public class ProcessTracking {
     }
 
     private void showSuperAppProcesses() {
-        List<Integer> superAppPIDs = getSuperAppPIDs();
-
-        List<ProcessInfo> superAppProcesses = getAllProcesses().stream()
-                .filter(process -> superAppPIDs.contains(process.getPid()))
-                .collect(Collectors.toList());
-
-        processTrackingTableView.setItems(FXCollections.observableArrayList(superAppProcesses));
+        ObservableList<ProcessInfo> superAppProcesses = FXCollections.observableArrayList(getSuperAppProcesses());
+        processTrackingTableView.setItems(superAppProcesses);
     }
-
 }
