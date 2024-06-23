@@ -26,6 +26,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -98,6 +99,8 @@ public class ProcessTracking {
     private long startTime = System.currentTimeMillis() / 1000;
 
     private StringBuilder logBuilder = new StringBuilder();
+
+    private static final String PROCESS_NAME_PREFIX = "SuperApp";
 
     public void initialize() {
         initializeTableColumns();
@@ -215,17 +218,48 @@ public class ProcessTracking {
 
         processes.sort(Comparator.comparingDouble(OSProcess::getProcessCpuLoadCumulative).reversed());
 
-        return processes.stream().map(proc -> new ProcessInfo(
-                proc.getProcessID(),
-                proc.getName(),
-                Math.round(100d * (proc.getKernelTime() + proc.getUserTime()) / proc.getUpTime() * 100.0) / 100.0,
-                proc.getResidentSetSize() / (1024 * 1024),
-                proc.getState().name(),
-                proc.getPriority(),
-                proc.getStartTime(),
-                proc.getPath(),
-                proc.getUser()
-        )).collect(Collectors.toList());
+        return processes.stream().map(proc -> {
+            String name = proc.getName();
+            int pid = proc.getProcessID();
+            // Check if the process is a superApp process and update its name if necessary
+            if (isSuperAppProcess(pid)) {
+                name = getSuperAppProcessName(pid);
+            }
+            return new ProcessInfo(
+                    pid,
+                    name,
+                    Math.round(100d * (proc.getKernelTime() + proc.getUserTime()) / proc.getUpTime() * 100.0) / 100.0,
+                    proc.getResidentSetSize() / (1024 * 1024),
+                    proc.getState().name(),
+                    proc.getPriority(),
+                    proc.getStartTime(),
+                    proc.getPath(),
+                    proc.getUser()
+            );
+        }).collect(Collectors.toList());
+    }
+
+    private boolean isSuperAppProcess(int pid) {
+        // Check if the process is a superApp process based on the pid
+        List<Integer> superAppPIDs = getSuperAppPIDs();
+        return superAppPIDs.contains(pid);
+    }
+
+    private String getSuperAppProcessName(int pid) {
+        // Retrieve the name of the superApp process based on the pid
+        // This implementation assumes that the process name is passed as an argument
+        // You can modify this logic based on your requirements
+        String processName = "SuperApp Process";
+        try {
+            List<String> args = Files.readAllLines(Paths.get("/proc/" + pid + "/cmdline"));
+            if (args.size() > 1) {
+                processName = args.get(1);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            log("Ошибка чтения имени процесса: " + e.getMessage());
+        }
+        return processName;
     }
 
     private List<ProcessInfo> getSuperAppProcesses() {
@@ -670,3 +704,4 @@ public class ProcessTracking {
         processTrackingTableView.setItems(superAppProcesses);
     }
 }
+
