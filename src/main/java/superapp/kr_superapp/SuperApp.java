@@ -7,6 +7,12 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class SuperApp extends Application {
     private static final String HOME_DIR = System.getProperty("user.home") + "/SuperApp/src/main/home";
     private static final String TRASH_DIR = System.getProperty("user.home") + "/SuperApp/src/main/trash";
@@ -83,6 +89,7 @@ public class SuperApp extends Application {
             e.printStackTrace();
         }
     }
+
 
     public static void main(String[] args) {
         launch(args);
