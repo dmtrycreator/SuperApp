@@ -53,7 +53,7 @@ public class SuperApp extends Application {
         controller.setStage(stage);
 
         stage.setScene(scene);
-        stage.setTitle("SuperApp Installation");
+        stage.setTitle("SuperApp: Установка");
         stage.show();
     }
 
@@ -68,7 +68,7 @@ public class SuperApp extends Application {
             System.err.println("CSS file not found");
         }
 
-        stage.setTitle("SuperApp");
+        stage.setTitle("SuperApp: Файловый Менеджер");
         stage.setScene(scene);
         stage.show();
         stage.setResizable(false);
@@ -77,13 +77,12 @@ public class SuperApp extends Application {
     private void trackSuperAppProcesses() {
         List<String> pids = ProcessUtils.getLinuxProcesses().stream()
                 .filter(process -> process.getExecutablePath().contains("SuperApp"))
-                .map(ProcessInfo::getPid)
-                .map(String::valueOf)
+                .map(process -> process.getPid() + ":" + process.getName())
                 .collect(Collectors.toList());
 
         try {
             FileMappingHandler fileMappingHandler = new FileMappingHandler();
-            fileMappingHandler.writeData(String.join(",", pids).getBytes());
+            fileMappingHandler.writeData(("superapp_processes:" + String.join(",", pids)).getBytes());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
