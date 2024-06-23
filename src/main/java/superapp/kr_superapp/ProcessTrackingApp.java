@@ -109,7 +109,6 @@ public class ProcessTracking {
 
         allProcessesMenuItem.setOnAction(event -> showAllProcesses());
         actProcessesMenuItem.setOnAction(event -> showActiveProcesses());
-
         superAppProcessesMenuItem.setOnAction(event -> showSuperAppProcesses());
 
         actProcessesMenuItem.setSelected(true);
@@ -178,9 +177,9 @@ public class ProcessTracking {
             case "active":
                 processes = processes.stream().filter(process -> process.getCpuUsage() > 0).collect(Collectors.toList());
                 break;
-             case "superApp":
-                 processes = getSuperAppProcesses();
-                 break;
+            case "superApp":
+                processes = getSuperAppProcesses();
+                break;
         }
         ObservableList<ProcessInfo> processList = FXCollections.observableArrayList(processes);
         processTrackingTableView.setItems(processList);
@@ -216,22 +215,22 @@ public class ProcessTracking {
         )).collect(Collectors.toList());
     }
 
-     private List<ProcessInfo> getSuperAppProcesses() {
-         try {
-             FileMappingHandler fileMappingHandler = new FileMappingHandler();
-             byte[] data = fileMappingHandler.readData();
-             String[] processNames = new String(data).trim().split(",");
+    private List<ProcessInfo> getSuperAppProcesses() {
+        try {
+            FileMappingHandler fileMappingHandler = new FileMappingHandler();
+            byte[] data = fileMappingHandler.readData();
+            String[] processNames = new String(data).trim().split(",");
 
-             List<ProcessInfo> processes = getAllProcesses();
-             return processes.stream()
-                     .filter(process -> Arrays.asList(processNames).contains(process.getName()))
-                     .collect(Collectors.toList());
-         } catch (IOException | InterruptedException e) {
-             e.printStackTrace();
-             log("Ошибка чтения из общей памяти: " + e.getMessage());
-             return FXCollections.observableArrayList();
-         }
-     }
+            List<ProcessInfo> processes = getAllProcesses();
+            return processes.stream()
+                    .filter(process -> Arrays.asList(processNames).contains(process.getName()))
+                    .collect(Collectors.toList());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            log("Ошибка чтения из общей памяти: " + e.getMessage());
+            return FXCollections.observableArrayList();
+        }
+    }
 
     private void showAllProcesses() {
         ObservableList<ProcessInfo> processList = FXCollections.observableArrayList(getAllProcesses());
@@ -250,8 +249,8 @@ public class ProcessTracking {
     private String getSelectedFilter() {
         if (actProcessesMenuItem.isSelected()) {
             return "active";
-             } else if (superAppProcessesMenuItem.isSelected()) {
-                 return "superApp";
+        } else if (superAppProcessesMenuItem.isSelected()) {
+            return "superApp";
         } else {
             return "all";
         }
@@ -650,7 +649,6 @@ public class ProcessTracking {
             }
         });
     }
-
 
     private void showSuperAppProcesses() {
         ObservableList<ProcessInfo> superAppProcesses = FXCollections.observableArrayList(getSuperAppProcesses());
