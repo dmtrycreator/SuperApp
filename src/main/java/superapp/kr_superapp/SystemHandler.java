@@ -246,7 +246,7 @@ public class SystemHandler {
             scene.getStylesheets().add(FileGridView.class.getResource("style.css").toExternalForm());
 
             Stage stage = new Stage();
-            stage.setTitle("");
+            stage.setTitle(name);
             stage.setScene(scene);
             stage.show();
         }
