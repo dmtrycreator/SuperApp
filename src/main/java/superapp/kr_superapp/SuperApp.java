@@ -8,8 +8,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SuperApp extends Application {
     private static final String HOME_DIR = System.getProperty("user.home") + "/SuperApp/src/main/home";
@@ -20,7 +21,6 @@ public class SuperApp extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        // Установка иконки приложения
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/superapp/kr_superapp/icons/Icon_SuperApp.png")));
 
         createDirectories();
@@ -30,6 +30,8 @@ public class SuperApp extends Application {
         } else {
             showMainWindow(stage);
         }
+
+        trackSuperAppProcesses();
     }
 
     private void createDirectories() throws IOException {
@@ -70,6 +72,21 @@ public class SuperApp extends Application {
         stage.setScene(scene);
         stage.show();
         stage.setResizable(false);
+    }
+
+    private void trackSuperAppProcesses() {
+        List<String> pids = ProcessUtils.getLinuxProcesses().stream()
+                .filter(process -> process.getExecutablePath().contains("SuperApp"))
+                .map(ProcessInfo::getPid)
+                .map(String::valueOf)
+                .collect(Collectors.toList());
+
+        try {
+            FileMappingHandler fileMappingHandler = new FileMappingHandler();
+            fileMappingHandler.writeData(String.join(",", pids).getBytes());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
