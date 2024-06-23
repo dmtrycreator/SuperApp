@@ -43,17 +43,27 @@ public class MenuHandler {
 
             String javafxPath = "lib/javafx-sdk-22.0.1/lib";
 
-            new ProcessBuilder(
+            ProcessBuilder processBuilder = new ProcessBuilder(
                     "java",
                     "--module-path", javafxPath,
                     "--add-modules", "javafx.controls,javafx.fxml",
                     "-cp", System.getProperty("java.class.path"),
                     appClassName,
                     filePath
-            ).start();
-        } catch (IOException | InterruptedException e) {
+            );
+            
+            log("Запуск приложения с командой: " + String.join(" ", processBuilder.command()));
+            
+            Process process = processBuilder.start();
+            int exitCode = process.waitFor();
+            log("Приложение завершилось с кодом: " + exitCode);
+
+        } catch (IOException e) {
             e.printStackTrace();
-            log("Ошибка чтения из общей памяти или запуска приложения: " + e.getMessage());
+            log("Ошибка ввода/вывода при чтении из общей памяти или запуске приложения: " + e.getMessage());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            log("Ошибка прерывания при запуске приложения: " + e.getMessage());
         }
     }
 
