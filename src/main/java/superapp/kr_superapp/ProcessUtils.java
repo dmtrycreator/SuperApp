@@ -39,7 +39,8 @@ public class ProcessUtils {
             long startTime = process.getStartTime();
             String executablePath = process.getPath();
             String userName = process.getUser();
-            processList.add(new ProcessInfo(pid, name, cpuUsage, memoryUsage, state, priority, startTime, executablePath, userName));
+            String commandLine = String.join(" ", process.getArguments());
+            processList.add(new ProcessInfo(pid, name, cpuUsage, memoryUsage, state, priority, startTime, executablePath, userName, commandLine));
         }
         return processList;
     }
